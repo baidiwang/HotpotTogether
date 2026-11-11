@@ -1,13 +1,13 @@
 import { useId } from 'react';
 import type { ItemId } from '@/lib/dinner';
 
-export function FoodArt({ kind }: { kind: ItemId | 'pot' }) {
+export function FoodArt({ kind, empty = false }: { kind: ItemId | 'pot'; empty?: boolean }) {
   const id = useId().replace(/:/g, '');
   const fill = `url(#${id})`;
-  return <svg className={`food-art food-${kind}`} viewBox="0 0 200 150" aria-hidden="true">
+  return <svg className={`food-art food-${kind} ${empty ? 'food-empty' : ''}`} viewBox="0 0 200 150" aria-hidden="true">
     <defs>
       <linearGradient id={id} x1="0" y1="0" x2="0.8" y2="1"><stop offset="0" className="food-light"/><stop offset="0.55" className="food-mid"/><stop offset="1" className="food-dark"/></linearGradient>
-      <filter id={`${id}-shadow`} x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="7" stdDeviation="5" className="food-shadow"/></filter>
+      <filter id={`${id}-shadow`} x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="4" stdDeviation="4" className="food-shadow"/></filter>
     </defs>
     <g filter={`url(#${id}-shadow)`}>
       {kind === 'napa' && <g transform="rotate(-22 100 80)">{[0,1,2,3,4].map(n=><path key={n} d={`M ${73+n*7} 132 C ${33+n*12} 105 ${29+n*14} 38 ${69+n*12} 24 C ${139+n*3} 12 ${152-n*3} 85 ${113-n*4} 134 Z`} fill={fill} stroke="var(--food-vein)" strokeWidth="1.2"/>)}<path d="M95 130 Q82 73 99 34 M95 108 L58 73 M96 85 L128 49 M95 117 L131 82" fill="none" stroke="var(--food-vein)" strokeWidth="3"/></g>}
