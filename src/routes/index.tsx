@@ -1,23 +1,77 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import { ArrowRight, ArrowUpRight, Check, CheckCheck, ChefHat, CircleDollarSign, Grid2X2, Leaf, List, LockKeyhole, Minus, Plus, RotateCcw, ShoppingBag, Soup, Sparkles, Trash2, Undo2, Users, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { FoodArt } from '@/components/food-art';
+import { usePlanner } from '@/hooks/use-planner';
+import { acceptProposal, catalog, cost, initialState, packages, preferences, quantityLabel, review, shoppingAssistant, undo, updatePlan, type ItemId, type Plan } from '@/lib/dinner';
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
+  head: () => ({ meta: [
+    { title: 'Hotpot Together — Your shared dinner plan' },
+    { name: 'description', content: 'Shape a hotpot dinner for everyone. Coordinate ingredients, whole grocery packages, and sample budget estimates in one shared plan.' },
+    { property: 'og:title', content: 'Hotpot Together — Your shared dinner plan' },
+    { property: 'og:description', content: 'Good food. Everyone considered. A shared tabletop for your next hotpot dinner.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+  ] }),
   component: Index,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const money = (n: number) => `$${n.toFixed(2)}`;
+const specialists = [
+  { id: 'menu', name: 'Menu', subtitle: 'Variety & everyone’s preferences', icon: Leaf },
+  { id: 'shopping', name: 'Shopping', subtitle: 'The right amount, in whole packs', icon: ShoppingBag },
+  { id: 'budget', name: 'Budget', subtitle: 'Good food, within your limit', icon: CircleDollarSign },
+] as const;
+type Specialist = typeof specialists[number]['id'];
+function Stepper({ label, value, max, min = 0, onChange }: { label: string; value: number; max: number; min?: number; onChange: (n: number) => void }) {
+  return <div className="stepper"><Button variant="ghost" size="icon" aria-label={`Decrease ${label}`} title={`Decrease ${label}`} disabled={value <= min} onClick={() => onChange(value - 1)}><Minus /></Button><span className="stepper-value" aria-label={label}>{value}</span><Button variant="ghost" size="icon" aria-label={`Increase ${label}`} title={`Increase ${label}`} disabled={value >= max} onClick={() => onChange(value + 1)}><Plus /></Button></div>;
+}
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  const { state, setState, storageWarning } = usePlanner();
+  const { plan, proposal } = state;
+  const [view, setView] = useState<'table' | 'shopping'>('table');
+  const [selected, setSelected] = useState<ItemId | null>(null);
+  const [assistant, setAssistant] = useState<Specialist | null>(null);
+  const [choice, setChoice] = useState<number | null>(null);
+  const selectedItem = catalog.find(item => item.id === selected);
+  const preview = proposal ? (choice === null ? proposal.plan : proposal.alternatives[choice]?.plan ?? proposal.plan) : null;
+  const confirmedCost = cost(plan);
+  const previewCost = preview ? cost(preview) : null;
+  const update = (next: Plan, message = '') => { setState(s => updatePlan(s, next, message)); setChoice(null); };
+  const changePreferences = (changes: Partial<Pick<Plan, 'guests' | 'vegetarians' | 'budget'>>) => update(preferences(plan, changes));
+  const highlight = (id: ItemId) => assistant === 'menu' ? catalog.find(item => item.id === id)?.vegetarian : assistant === 'shopping' ? preview ? packages(preview.quantities[id], catalog.find(item => item.id === id) ?? catalog[0]) !== packages(plan.quantities[id], catalog.find(item => item.id === id) ?? catalog[0]) : true : assistant === 'budget' ? id === 'beef' || id === 'enoki' : false;
+  const suggestion = (id: ItemId) => {
+    const item = catalog.find(i => i.id === id);
+    if (!preview || !item || preview.quantities[id] === plan.quantities[id]) return '';
+    const extra = packages(preview.quantities[id], item) - packages(plan.quantities[id], item);
+    if (assistant === 'shopping') return extra > 0 ? `${extra} extra ${extra === 1 ? 'pack is' : 'packs are'} needed for ${plan.guests} guests` : extra < 0 ? `${Math.abs(extra)} fewer packs to buy` : 'Fits in the same whole packages';
+    if (assistant === 'budget') return `${money(packages(preview.quantities[id], item) * item.price)} in the proposed plan`;
+    return item.vegetarian && plan.vegetarians > 0 && id !== 'broth' ? 'More plant-based food to share' : id === 'beef' && preview.quantities[id] < proposal?.plan.quantities.beef ? 'Less beef, same generous spread' : `Adjusted for ${plan.guests} guests`;
+  };
+  const rows = shoppingAssistant(plan);
+  const categoryCost = (ids: ItemId[]) => catalog.filter(item => ids.includes(item.id)).reduce((sum, item) => sum + packages(plan.quantities[item.id], item) * item.price, 0);
+  return <div className="app-shell">
+    <header className="app-header"><div className="wordmark"><Soup className="brand-mark" strokeWidth={1.6} />Hotpot Together</div><div className="header-tools"><span className="mode-label">Sample mode</span><Button variant="ghost" size="sm" disabled={!state.history.length} onClick={() => { setState(undo); setChoice(null); setSelected(null); }} title="Undo the last change" aria-label="Undo"><Undo2 />Undo</Button><Button variant="ghost" size="sm" onClick={() => { setState(s => ({ ...initialState(), revision: s.revision + 1, message: 'Reset to the original dinner for six.' })); setChoice(null); setSelected(null); setAssistant(null); }} title="Reset to the original dinner" aria-label="Reset"><RotateCcw />Reset</Button></div></header>
+    <section className="intro"><div className="eyebrow">A place for everyone at the table</div><h1>Good food. <em>Everyone considered.</em></h1><p>Shape the dinner. Your assistants coordinate the details.</p><div className="intro-note"><Leaf size={15} strokeWidth={1.5} /> A little planning. A lot of togetherness.</div></section>
+    <section className="planning-strip" aria-label="Dinner preferences"><div className="planning-field"><span className="field-label"><Users size={15} />Guests</span><Stepper label="guests" value={plan.guests} min={1} max={30} onChange={guests => changePreferences({guests})} /></div><div className="planning-field"><span className="field-label"><Leaf size={15} />Vegetarian</span><Stepper label="vegetarian guests" value={plan.vegetarians} max={plan.guests} onChange={vegetarians => changePreferences({vegetarians})}/></div><div className="planning-field"><label className="field-label" htmlFor="budget">Budget</label><div className="budget-input"><span>$</span><Input id="budget" aria-label="Budget" type="number" min="0" step="1" value={plan.budget} onChange={event => changePreferences({budget: Number(event.target.value)})}/></div></div><Button className="review-button" onClick={() => { setState(s => ({...s, proposal: review(s.plan, s.revision), message: ''})); setChoice(null); setAssistant('menu'); }}>Review changes<ArrowRight /></Button></section>
+    <div className="shortcut-row"><Button variant="ghost" onClick={() => { changePreferences({guests:8,vegetarians:1}); }}><Plus size={12}/>Two more friends, one vegetarian<ArrowUpRight size={12}/></Button><span>One shared plan · Revision {state.revision.toString().padStart(2,'0')}</span></div>
+    <main className="workspace"><div className="workspace-main"><div className="workspace-topline"><div className="table-title">{view === 'table' ? 'Your dinner table' : 'Your shopping list'}<span> / {rows.length} ingredients</span></div><div className="view-toggle" aria-label="Plan view"><Button variant="ghost" aria-pressed={view === 'table'} onClick={() => setView('table')}><Grid2X2 size={13}/>Table</Button><Button variant="ghost" aria-pressed={view === 'shopping'} onClick={() => setView('shopping')}><List size={13}/>Shopping list</Button></div></div>
+    {view === 'table' ? <div className="table-board">{catalog.filter(item => plan.quantities[item.id] > 0).map(item => {
+      const changed = preview && preview.quantities[item.id] !== plan.quantities[item.id];
+      return <div key={item.id} className={`food-slot slot-${item.id}`}><Button variant="ghost" className={`ingredient-button ${highlight(item.id) ? 'is-highlighted' : ''} ${changed ? 'is-proposed' : ''}`} aria-pressed={selected === item.id} aria-label={`Edit ${item.name}`} onClick={() => setSelected(selected === item.id ? null : item.id)}>{plan.kept.includes(item.id) && <span className="kept-pin" title="Kept item"><LockKeyhole /></span>}<FoodArt kind={item.id}/><span className="ingredient-name">{item.name}</span><span className="ingredient-qty">{changed ? <><del>{quantityLabel(plan.quantities[item.id],item)}</del><span className="proposal-qty">{quantityLabel(preview.quantities[item.id],item)}</span></> : quantityLabel(plan.quantities[item.id],item)}</span></Button>{changed && <span className="ingredient-note">{suggestion(item.id)}</span>}</div>;
+    })}<div className="pot-anchor"><FoodArt kind="pot"/><div className="pot-caption"><span>Better, together.</span>Tomato & mushroom broth<br/>Separate vegetarian side</div></div></div> : <div className="shopping-list"><div className="shopping-head"><span>Ingredient</span><span>Planned</span><span>Packages</span><span>Estimate</span></div>{rows.map(({item,packs,subtotal}) => <div className={`shopping-row ${highlight(item.id) ? 'highlight' : ''}`} key={item.id}><Button variant="ghost" onClick={() => setSelected(item.id)} aria-label={`Edit ${item.name}`}><FoodArt kind={item.id}/><span>{item.name}{plan.kept.includes(item.id) && <LockKeyhole size={10} className="inline ml-1"/>}</span></Button><span className="shopping-quantity">{quantityLabel(plan.quantities[item.id],item)}{preview && preview.quantities[item.id] !== plan.quantities[item.id] && <span className="shopping-proposed">→ {quantityLabel(preview.quantities[item.id],item)}</span>}</span><span>{packs} × {item.packageSize}{item.unit === 'g' ? 'g' : ' set'}{preview && packages(preview.quantities[item.id],item) !== packs && <span className="shopping-proposed">→ {packages(preview.quantities[item.id],item)} packs</span>}</span><span>{money(subtotal)}{preview && packages(preview.quantities[item.id],item) !== packs && <span className="shopping-proposed">→ {money(packages(preview.quantities[item.id],item)*item.price)}</span>}</span></div>)}<div className="shopping-total"><span>Confirmed total <span className="text-muted-foreground text-xs">· Sample estimates</span></span><span>{money(confirmedCost)}</span></div></div>}
+    {selectedItem && plan.quantities[selectedItem.id] > 0 && <section className="ingredient-editor" aria-label={`${selectedItem.name} controls`}><strong>{selectedItem.name}</strong><div className="quantity-control"><label htmlFor="quantity">Quantity</label><Input id="quantity" type="number" min="1" step={selectedItem.unit === 'g' ? 50 : 1} value={plan.quantities[selectedItem.id]} onChange={e => update({...plan, quantities:{...plan.quantities,[selectedItem.id]:Math.max(1,Number(e.target.value))}})}/><span>{selectedItem.unit}</span></div><label className="keep-label"><Checkbox checked={plan.kept.includes(selectedItem.id)} onCheckedChange={checked => update({...plan, kept:checked ? [...plan.kept,selectedItem.id] : plan.kept.filter(id=>id!==selectedItem.id)})}/>Keep this item</label><Button variant="ghost" size="icon" title={plan.kept.includes(selectedItem.id) ? 'Unkeep this item before removing it' : 'Remove ingredient'} aria-label={`Remove ${selectedItem.name}`} disabled={plan.kept.includes(selectedItem.id)} onClick={() => { update({...plan, quantities:{...plan.quantities,[selectedItem.id]:0}},`${selectedItem.name} removed.`); setSelected(null); }}><Trash2 /></Button><Button variant="ghost" size="icon" aria-label="Close ingredient controls" title="Close controls" onClick={() => setSelected(null)}><X /></Button></section>}
+    <div className="table-footer"><div><Leaf size={13}/>{rows.filter(r=>r.item.vegetarian).length} plant-based ingredients</div><div><LockKeyhole size={12}/>{plan.kept.length} kept</div><span>{preview ? 'Dashed outlines are proposed, not applied' : 'A spread made for sharing'}</span></div>
+    {catalog.some(item => plan.quantities[item.id] === 0) && <div className="flex flex-wrap gap-2 py-2">{catalog.filter(item=>plan.quantities[item.id]===0).map(item=><Button key={item.id} variant="outline" size="sm" onClick={()=>update({...plan,quantities:{...plan.quantities,[item.id]:item.base}})}><Plus/>Add {item.name}</Button>)}</div>}
+    {proposal && preview && <section className="proposal-section" aria-label="Coordinated proposal"><div className="proposal-heading"><h2>A dinner for {plan.guests}, considered together.</h2><span>Proposal · not yet applied</span></div><p className="proposal-explanation">Menu adjusted portions{plan.vegetarians ? ' with extra tofu, mushrooms, and greens for your vegetarian guest' : ' for your group'}. Shopping rounded everything to whole packs. Budget checked the same plan.</p><div className="proposal-choice"><div><h3>The generous spread</h3><p>{proposal.plan.vegetarians} vegetarian {proposal.plan.vegetarians === 1 ? 'guest' : 'guests'} · {shoppingAssistant(proposal.plan).reduce((sum,row)=>sum+row.packs,0)} whole packages{cost(proposal.plan)>plan.budget ? ` · ${money(cost(proposal.plan)-plan.budget)} over your limit` : ' · Within your limit'}</p></div><div className="choice-cost">{money(cost(proposal.plan))}</div><div className="choice-actions"><Button variant="ghost" size="sm" onClick={()=>setChoice(null)} aria-pressed={choice===null}>Preview original</Button><Button size="sm" disabled={cost(proposal.plan)>plan.budget} onClick={()=>{setState(s=>acceptProposal(s,proposal.plan));setChoice(null);}}><Check/>Accept proposal</Button></div></div>
+    {proposal.alternatives.length>0 && <><p className="eyebrow mt-6 mb-3">Budget alternatives · Kept items respected</p>{proposal.alternatives.map((option,index)=><div className={`proposal-choice ${choice===index?'active':''}`} key={option.title}><div><h3>{option.title}</h3><p>{option.explanation}</p></div><div className="choice-cost">{money(cost(option.plan))}</div><div className="choice-actions"><Button variant="ghost" size="sm" aria-pressed={choice===index} onClick={()=>{setChoice(index);setAssistant('budget');}}>{choice===index?<Check/>:<Grid2X2/>}Preview alternative</Button><Button size="sm" disabled={choice!==index} onClick={()=>{setState(s=>acceptProposal(s,option.plan));setChoice(null);}}><Check/>Accept this plan</Button></div></div>)}</>}
+    {cost(proposal.plan)>plan.budget && !proposal.alternatives.length && <div className="conflict-note">This spread costs {money(cost(proposal.plan))}, above your {money(plan.budget)} limit. {plan.kept.includes('beef') ? 'Beef is kept, so Budget will not reduce or replace it. ' : ''}There is no sample alternative that meets all current constraints. Which constraint would you like to change: your budget, guest count, or kept items? Adjust it above and review again.</div>}
+    <div className="flex justify-end mt-3"><Button variant="ghost" size="sm" onClick={()=>{setState(s=>({...s,proposal:null}));setChoice(null);}}>Discard proposal<X /></Button></div></section>}
+    <p className="status-message" role="status">{storageWarning ? 'Browser saving is unavailable. This plan will last for this visit only.' : state.message}</p>
+    </div><aside className="assistant-sidebar"><div><div className="eyebrow">Your dinner assistants</div><div className="assistant-list">{specialists.map(({id,name,subtitle,icon:Icon})=><Button key={id} variant="ghost" className="assistant-button" aria-pressed={assistant===id} onClick={()=>setAssistant(assistant===id?null:id)}><span className={`assistant-avatar avatar-${id}`}><Icon size={16} strokeWidth={1.5}/></span><span><strong>{name}</strong><small>{subtitle}</small></span><Check className="assistant-ready" size={12}/></Button>)}</div><div className="assistant-note">{assistant==='menu' ? plan.vegetarians ? 'Extra plant-based portions, plus a separate mushroom broth side. Green highlights show vegetarian ingredients.' : 'Leafy greens, mushrooms, tofu, and a little of everything. Plant-based ingredients are highlighted.' : assistant==='shopping' ? 'Quantities are rounded up to whole packages. Highlighted ingredients need a different pack count in this preview.' : assistant==='budget' ? 'Beef and mushrooms have the biggest cost impact. Kept items stay in every alternative.' : <><span className="text-foreground">Three perspectives. One dinner.</span><br/>Sample suggestions, coordinated around the same ingredients.</>}</div></div><div className="budget-summary"><div className="budget-heading"><span>At a glance</span><CircleDollarSign/></div><div className="cost-number">{money(confirmedCost)}<small>/ ${plan.budget}</small></div><div className={`budget-track ${confirmedCost>plan.budget?'over':''}`} aria-label={`${Math.round(confirmedCost/(plan.budget||1)*100)} percent of budget`}>{Array.from({length:24},(_,i)=><span key={i} className={i<Math.min(24,Math.ceil(confirmedCost/(plan.budget||1)*24))?'filled':''}/>)}</div><div className={`budget-remaining ${confirmedCost>plan.budget?'over':''}`}>{confirmedCost>plan.budget?`${money(confirmedCost-plan.budget)} above budget`:`${money(plan.budget-confirmedCost)} left in your budget`}</div><div className="estimate-label">Confirmed plan · Sample estimates · USD</div><div className="budget-breakdown"><div><span>Vegetables & mushrooms</span><span>{money(categoryCost(['napa','enoki','lotus','bok']))}</span></div><div><span>Protein</span><span>{money(categoryCost(['tofu','beef']))}</span></div><div><span>Noodles & broth</span><span>{money(categoryCost(['noodles','broth']))}</span></div></div>{previewCost!==null && <div className="budget-proposed"><span>Proposed total {choice!==null?'· Alternative':''}</span><strong>{money(previewCost)}</strong></div>}<div className="assistant-note"><Soup size={15} className="mb-2"/>Two broths, one table. Tomato on one side, vegetarian mushroom on the other.</div></div></aside></main>
+    <footer className="page-footer"><span className="footer-signature">Made for gathering.</span><span>Sample mode · Local suggestions, not live AI · Prices are sample estimates</span></footer>
+  </div>;
 }
