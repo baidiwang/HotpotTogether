@@ -100,8 +100,8 @@ button:focus-visible, a:focus-visible { outline:2px solid var(--primary); outlin
 .workspace-label>span{font-size:11px;color:var(--muted-foreground);}
 .table-board{position:relative;max-width:950px;width:100%;height:clamp(560px,calc(100svh - 260px),650px);margin:0 auto;}
 .food-slot{position:absolute;width:170px;height:172px;transform:translate(-50%,-50%);}
-.slot-napa{left:29%;top:16%;}
-.slot-enoki{left:59%;top:14%;}
+.slot-napa{left:29%;top:12%;}
+.slot-enoki{left:59%;top:10%;}
 .slot-tofu{left:81%;top:38%;}
 .slot-lotus{left:75%;top:76%;}
 .slot-bok{left:48%;top:88%;}
