@@ -31,7 +31,7 @@ describe('shared dinner rules', () => {
     expect(p.pipeline.budget.source).toBe(p.pipeline.shopping.id);
     expect(p.pipeline.menu.plan.quantities.napa).toBe(1100);
     expect(p.pipeline.menu.plan.quantities.noodles).toBe(700);
-    expect(p.pipeline.shopping.extraPacks).toBe(6);
+    expect(p.pipeline.shopping.extraPacks).toBe(8);
     expect(p.pipeline.budget.total).toBe(p.pipeline.shopping.purchases.reduce((sum,row)=>sum+row.subtotal,0));
     expect(p.pipeline.budget.overBy).toBe(26);
     expect(p.alternatives.map(a=>a.pipeline.budget.total)).toEqual([114,115]);

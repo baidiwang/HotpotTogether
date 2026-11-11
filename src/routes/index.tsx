@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { FoodArt } from '@/components/food-art';
 import { IngredientControl } from '@/components/ingredient-control';
 import { DinnerPreferences } from '@/components/dinner-preferences';
-import { assistants, AssistantTeam, JointProposal, contributionText, money, type Assistant } from '@/components/assistant-team';
+import { assistants, AssistantTeam, JointProposal, money, type Assistant } from '@/components/assistant-team';
 import { usePlanner } from '@/hooks/use-planner';
 import { acceptProposal, catalog, coordinate, cost, initialPlan, initialState, packages, preferences, quantityLabel, review, shoppingAssistant, undo, updatePlan, type Item, type ItemId, type Plan } from '@/lib/dinner';
 export const Route = createFileRoute('/')({head:()=>({meta:[{title:'Hotpot Together — One shared dinner plan'},{name:'description',content:'Menu, Shopping, and Budget coordinate a shared hotpot plan with accurate sample purchase estimates.'},{property:'og:title',content:'Hotpot Together — One shared dinner plan'},{property:'og:description',content:'A shared dinner table, with portions, purchases, and budget considered together.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Index});
