@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { ArrowRight, ArrowUpRight, Check, CheckCheck, ChefHat, CircleDollarSign, Grid2X2, Leaf, List, LockKeyhole, Minus, Plus, RotateCcw, ShoppingBag, Soup, Sparkles, Trash2, Undo2, Users, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, CircleDollarSign, Grid2X2, Leaf, List, LockKeyhole, Minus, Plus, RotateCcw, ShoppingBag, Soup, Trash2, Undo2, Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -42,14 +42,20 @@ function Index() {
   const previewCost = preview ? cost(preview) : null;
   const update = (next: Plan, message = '') => { setState(s => updatePlan(s, next, message)); setChoice(null); };
   const changePreferences = (changes: Partial<Pick<Plan, 'guests' | 'vegetarians' | 'budget'>>) => update(preferences(plan, changes));
-  const highlight = (id: ItemId) => assistant === 'menu' ? catalog.find(item => item.id === id)?.vegetarian : assistant === 'shopping' ? preview ? packages(preview.quantities[id], catalog.find(item => item.id === id) ?? catalog[0]) !== packages(plan.quantities[id], catalog.find(item => item.id === id) ?? catalog[0]) : true : assistant === 'budget' ? id === 'beef' || id === 'enoki' : false;
+  const highlight = (id: ItemId) => {
+    const item = catalog.find(i => i.id === id);
+    if (!item) return false;
+    if (assistant === 'menu') return item.vegetarian;
+    if (assistant === 'shopping') return preview ? packages(preview.quantities[id], item) !== packages(plan.quantities[id], item) : true;
+    return assistant === 'budget' && (id === 'beef' || id === 'enoki');
+  };
   const suggestion = (id: ItemId) => {
     const item = catalog.find(i => i.id === id);
     if (!preview || !item || preview.quantities[id] === plan.quantities[id]) return '';
     const extra = packages(preview.quantities[id], item) - packages(plan.quantities[id], item);
     if (assistant === 'shopping') return extra > 0 ? `${extra} extra ${extra === 1 ? 'pack is' : 'packs are'} needed for ${plan.guests} guests` : extra < 0 ? `${Math.abs(extra)} fewer packs to buy` : 'Fits in the same whole packages';
     if (assistant === 'budget') return `${money(packages(preview.quantities[id], item) * item.price)} in the proposed plan`;
-    return item.vegetarian && plan.vegetarians > 0 && id !== 'broth' ? 'More plant-based food to share' : id === 'beef' && preview.quantities[id] < proposal?.plan.quantities.beef ? 'Less beef, same generous spread' : `Adjusted for ${plan.guests} guests`;
+    return item.vegetarian && plan.vegetarians > 0 && id !== 'broth' ? 'More plant-based food to share' : id === 'beef' && proposal && preview.quantities[id] < proposal.plan.quantities.beef ? 'Less beef, same generous spread' : `Adjusted for ${plan.guests} guests`;
   };
   const rows = shoppingAssistant(plan);
   const categoryCost = (ids: ItemId[]) => catalog.filter(item => ids.includes(item.id)).reduce((sum, item) => sum + packages(plan.quantities[item.id], item) * item.price, 0);

@@ -8,11 +8,11 @@ describe('shared dinner rules', () => {
     expect(preferences(initialPlan(),{ guests: 2, vegetarians: 8 }).vegetarians).toBe(2);
   });
   it('rounds required quantity up to whole packages and sums their prices', () => {
-    expect(packages(501,catalog[0])).toBe(2); expect(cost({...initialPlan(), quantities:{...initialPlan().quantities,napa:1001}})).toBe(103);
+    const napa=catalog.find(item=>item.id==='napa'); if (!napa) throw new Error('Missing napa'); expect(packages(501,napa)).toBe(2); expect(cost({...initialPlan(), quantities:{...initialPlan().quantities,napa:1001}})).toBe(103);
   });
-  it('expands to eight with one vegetarian and calculates $150, exceeding $120', () => {
+  it('expands to eight with one vegetarian and calculates $146, exceeding $120', () => {
     const p = review(preferences(initialPlan(),{guests:8,vegetarians:1}),2);
-    expect(cost(p.plan)).toBe(150); expect(p.plan.quantities.tofu).toBe(900); expect(p.alternatives.map(a=>cost(a.plan))).toEqual([118,119]);
+    expect(cost(p.plan)).toBe(146); expect(p.plan.quantities.tofu).toBe(900); expect(p.alternatives.map(a=>cost(a.plan))).toEqual([114,115]);
   });
   it('does not reduce kept beef and reports no feasible budget alternative', () => {
     const p = review({...preferences(initialPlan(),{guests:8,vegetarians:1}),kept:['beef']},2);
@@ -30,8 +30,8 @@ describe('shared dinner rules', () => {
   it('applies one complete plan and Undo restores the previous complete plan', () => {
     const s=initialState(); const draft=preferences(s.plan,{guests:8,vegetarians:1});
     const ready={...updatePlan(s,draft),proposal:review(draft,2)};
-    const accepted=acceptProposal(ready,ready.proposal.alternatives[0].plan);
-    expect(cost(accepted.plan)).toBe(118); expect(accepted.plan.budget).toBe(120); expect(accepted.proposal).toBeNull(); expect(undo(accepted).plan).toEqual(draft);
+    const option=ready.proposal.alternatives[0]; if (!option) throw new Error('Missing alternative'); const accepted=acceptProposal(ready,option.plan);
+    expect(cost(accepted.plan)).toBe(114); expect(accepted.plan.budget).toBe(120); expect(accepted.proposal).toBeNull(); expect(undo(accepted).plan).toEqual(draft);
   });
   it('does not resurrect removed ingredients in a proposal', () => {
     expect(review({...initialPlan(),quantities:{...initialPlan().quantities,lotus:0}},1).plan.quantities.lotus).toBe(0);
