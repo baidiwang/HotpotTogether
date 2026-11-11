@@ -1,4 +1,7 @@
 # Hotpot Together
+- [ ] Editable dinner sentence, visible assistant team, compact editors and side-by-side joint proposal.
+- [ ] Trace Menu → Shopping → Budget dependencies and distinguish portions from purchases.
+- [ ] Verify highlights, complete proposal flow, constraints, persistence and responsive composition.
 - [x] Compact toolbar, circular tabletop, contextual ingredient editors and assistant dock.
 - [x] Consistent broth visuals, review status and preserved local state.
 - [x] Verify proposals, kept items, acceptance, Undo, broth restore and desktop/mobile composition.
