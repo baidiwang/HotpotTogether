@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { initialPlan, initialState, preferences, review, cost, packages, catalog, acceptProposal, updatePlan, undo } from '@/lib/dinner';
+import { initialPlan, initialState, preferences, review, cost, packages, catalog, acceptProposal, updatePlan, undo, shoppingAssistant } from '@/lib/dinner';
 describe('shared dinner rules', () => {
+  it('broth removal removes its $8 cost and restoring it returns the same complete plan', () => {
+    const original = initialState();
+    const removed = updatePlan(original, {...original.plan, quantities: {...original.plan.quantities, broth: 0}});
+    expect(cost(removed.plan)).toBe(91);
+    expect(shoppingAssistant(removed.plan).map(row => row.item.id)).not.toContain('broth');
+    expect(review(removed.plan, removed.revision).plan.quantities.broth).toBe(0);
+    const restored = updatePlan(removed, {...removed.plan, quantities: {...removed.plan.quantities, broth: 1}});
+    expect(restored.plan).toEqual(original.plan);
+    expect(cost(restored.plan)).toBe(99);
+    expect(undo(restored).plan).toEqual(removed.plan);
+  });
   it('starts with six guests, no vegetarians, $120 and a $99 confirmed estimate', () => {
     const p = initialPlan(); expect([p.guests,p.vegetarians,p.budget,cost(p)]).toEqual([6,0,120,99]);
   });

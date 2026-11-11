@@ -33,3 +33,4 @@ use the editor.
 - Keep dinner calculations and replaceable sample assistant functions in a browser-safe domain module so both views and proposals use identical rules.
 - Store confirmed plan, separate revision-bound proposal, and complete undo history in one planner controller; apply proposals atomically and persist only sample state locally as requested for this prototype.
 - Define food illustration palettes and all presentation tokens in the global stylesheet; reusable SVG ingredients inherit those tokens.
+- Derive the central pot's filled state and preparation notes from confirmed broth quantities; use ingredient popovers in both views and a persisted reviewed-plan snapshot for the toolbar's review status.
