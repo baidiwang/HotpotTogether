@@ -21,41 +21,41 @@ colors:
 typography:
   display:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "20px"
+    fontSize: "26px"
     fontWeight: 400
     lineHeight: 1.3
     letterSpacing: "-0.025em"
   headline:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "28px"
+    fontSize: "26px"
     fontWeight: 400
     letterSpacing: "-0.025em"
   title:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "15px"
+    fontSize: "16px"
     fontWeight: 400
   body:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "14px"
+    fontSize: "16px"
     fontWeight: 400
     letterSpacing: "0"
   label:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "13px"
+    fontSize: "14px"
     fontWeight: 400
   food-name:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "13px"
+    fontSize: "14px"
     fontWeight: 500
     lineHeight: 1.4
   caption:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "12px"
+    fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.5
   numeral:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "27px"
+    fontSize: "32px"
     fontWeight: 400
     lineHeight: 1.15
 rounded:
@@ -173,24 +173,27 @@ The table's six scoped custom properties are authoritative for new table content
 
 ## Typography
 
-**Display Font:** Instrument Sans, with system-ui and sans-serif fallbacks.
-**Body Font:** The same Instrument Sans stack.
+Instrument Sans remains the single interface family. The shared CSS role tokens,
+not component-specific or viewport-specific sizes, are authoritative:
 
-**Character:** Quiet and familiar, with regular-to-medium weights. The root loads weights (400, 500, 600); this route primarily uses (400) and (500). There is no added decorative face.
+| Role | Size | Usage |
+| --- | --- | --- |
+| Title | 26px | Page and drawer headings |
+| Body | 16px | Prose, primary actions, three collaboration rows |
+| Label | 14px | Ingredient/person names, portions, secondary actions |
+| Auxiliary | 13px | Mode notes, supporting labels; minimum text size |
+| Amount | 32px | Selected purchase total |
 
-### Hierarchy
+The existing wordmark retains its 20px brand treatment. Body leading is 1.5;
+object labels use 1.45. The same scale applies on phones without page scaling.
+Collaboration paragraphs cap at 70ch and wrap with min-width:0. Main muted ink is
+#575d50 on paper. The prior compact 11–12px annotation sizes are superseded.
 
-- **Display:** The short table invitation. It becomes (18px) at the mobile breakpoint.
-- **Headline:** The shopping drawer title, with tight tracking.
-- **Title:** The tray invitation. The wordmark is its own medium identity treatment (20px desktop, 19px mobile).
-- **Body:** The table response uses (14px / 1.45). Explanatory drawer and reason copy uses a more open line height (1.6).
-- **Label:** Tools, plate and pot labels, and acceptance text. Food and friend names use medium weight; amounts use the caption role.
-- **Caption:** Supporting purchase, preference and suggestion details. Several compact labels use (11px) at narrower widths; portal preference actions are kept at (14px) with minimum height (42px).
-- **Numeral:** Selected purchase cost, with tabular figures. It becomes (25px) on mobile; the drawer total stays (27px).
+Menu explains adjustments against the current guest/preferences context; Shopping
+recomputes whole packs and incremental price against selected food; Budget labels
+original first/revised totals separately from the remaining offer and current kept
+minimums. Estimates are explicitly unaccepted, with Sample/Live provenance visible.
 
-### Named Rules
-
-**The Quiet Hierarchy Rule.** Build hierarchy with whitespace, size and regular-to-medium weight. Keep interface copy in English and natural sentence case.
 
 ## Layout
 
@@ -298,4 +301,4 @@ The assets were created with the built-in `image_gen` tool on (2026-11-12), on t
 - **Don't** describe Shopping or Budget as model calls, imply local Live is configured, or silently replace a failed Live request with Sample.
 - **Don't** add nutrition claims, stock, checkout, game timers, levels or character movement.
 
-Not canonized or repaired by this documentation pass: the inherited root palette and slightly different portal colors remain contextual implementation differences, not a second universal theme. Compact (11px) annotations are observations, not a universal minimum-size recommendation. This record does not expand the finish review beyond its two resolved findings. Native drag start was observed, but the browser driver did not emit a drop; keyboard/click equivalence and arithmetic were verified separately, so native drag completion is not claimed.
+Not canonized or repaired by this documentation pass: the inherited root palette and slightly different portal colors remain contextual implementation differences, not a second universal theme. Compact (11px) annotations are observations, not a universal minimum-size recommendation. This record does not expand the finish review beyond its two resolved findings. The user subsequently confirmed complete drag/drop works. The typography pass preserves all drag handlers and does not reimplement them.

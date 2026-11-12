@@ -57,9 +57,9 @@ special preferences have a visible label. Select a plate (or focus it with the
 keyboard) to reveal **−/+** and pin controls. Tray buttons and plate **−/+** edit immediately. Dragging tray → table
 adds one plate; table → tray removes one. Suggestions can also be dragged onto
 the table. Native drag payload handlers have automated regression coverage;
-browser verification completed the click/keyboard alternatives. Native automation
-observed dragstart but did not deliver a drop, so full native drag completion has
-not been claimed. There is no ordering step.
+browser verification completed the click/keyboard alternatives. The user has also
+manually confirmed complete drag/drop works. The typography pass leaves the drag
+handlers unchanged. There is no ordering step.
 
 ### Data and control rules
 
@@ -90,7 +90,7 @@ not been claimed. There is no ordering step.
 - The experiment uses its own `hotpot-playable-table-v1` Sample storage key;
   the old planner's stored state is preserved. History contains complete snapshots.
 
-Validation: 65 tests cover the original rules and new plate workflow, partial
+Validation: 68 tests cover the original rules and new plate workflow, partial
 acceptance, keep constraints, whole-pack Budget feedback, stale Live responses,
 honest setup errors, broth decisions and drag handlers. TypeScript and production
 build checks also run. Browser checks cover 1440×900, 960×1000, 660×1090 and
@@ -488,3 +488,13 @@ Tests cover sample calculations, structured-output and constraint validation,
 server gateway success/error/timeout behavior with a mocked upstream, membership
 checks on Apply, and delayed-response invalidation after edits/Undo/Reset/mode
 changes/cancellation. Mocked gateway tests do not establish real project access.
+
+### Typography and collaboration update
+
+Shared roles are 26px title, 16px body/primary action/feedback, 14px object labels
+and secondary actions, 13px supporting text, and 32px selected totals. Phone and
+desktop use the same scale. The three feedback rows derive from the current offer;
+Budget distinguishes original first/revised totals from current choices. Shopping
+uses whole-pack counts and incremental cost. Broth purchase rows use broth sets.
+The user verified drag/drop; no interaction/controller/model architecture changes
+were part of this typography update.

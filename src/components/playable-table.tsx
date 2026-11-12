@@ -33,6 +33,7 @@ import {
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "./ui/sheet";
 import { usePlayableTable } from "@/hooks/use-playable-table";
 import { catalog, coordinate, cost, packages, quantityLabel, type Item } from "@/lib/dinner";
+import { tableFeedback, tablePortions } from "@/lib/table-feedback";
 import { plateCount, plateSizes, platesLabel } from "@/lib/plate-portions";
 import {
   acceptanceError,
@@ -344,14 +345,18 @@ function ShoppingDrawer({
               <FoodArt kind={row.item.id} />
               <span>
                 <strong>{row.item.name}</strong>
-                <small>{platesLabel(plateCount(plan, row.item.id))}</small>
+                <small>{tablePortions(plan, row.item.id)}</small>
               </span>
               <span>
                 {money(row.subtotal)} <ChevronDown />
               </span>
             </summary>
             <div className="pt-package-detail">
-              <p>One plate = {quantityLabel(plateSizes[row.item.id], row.item)}.</p>
+              <p>
+                {row.item.id === "broth"
+                  ? "Broth is planned and purchased in whole broth sets."
+                  : `One plate = ${quantityLabel(plateSizes[row.item.id], row.item)}.`}
+              </p>
               <p>
                 Planned {quantityLabel(plan.quantities[row.item.id], row.item)} → buy {row.packs} ×{" "}
                 {quantityLabel(row.item.packageSize, row.item)}.
@@ -453,19 +458,7 @@ export function PlayableTable() {
   const suggestedTotal = suggested ? cost(suggested) : selectedTotal;
   const canPlace = table.offer && !acceptanceError(plan, table.offer);
   const source = table.offer?.source;
-  const first = source?.attempts[0];
-  const last = source?.attempts.at(-1);
-  const leadChange = changes.find((item) => item.id === "tofu") ?? changes[0];
-  const leadDelta =
-    leadChange && suggested
-      ? plateCount(suggested, leadChange.id) - plateCount(plan, leadChange.id)
-      : 0;
-  const vegetarianFriend = friends.filter((friend) => friend.vegetarian).at(-1);
-  const suggestionMessage = leadChange
-    ? leadDelta > 0
-      ? `Menu suggests ${leadDelta === 1 ? "an extra plate" : `${leadDelta} extra plates`} of ${leadChange.name.toLowerCase()} ${leadChange.id === "tofu" && vegetarianFriend ? `for ${vegetarianFriend.name}` : "for the table"}.`
-      : `Menu suggests ${plateCount(plan, leadChange.id)} → ${plateCount(suggested!, leadChange.id)} plates of ${leadChange.name.toLowerCase()}.`
-    : "Menu checked the selected table.";
+  const feedback = suggested && source ? tableFeedback(plan, suggested, source) : null;
   const startDrag = (event: DragEvent, value: PlateDrag) => {
     event.dataTransfer.setData(dragType, JSON.stringify(value));
     event.dataTransfer.effectAllowed = value.from === "tray" ? "copy" : "move";
@@ -697,17 +690,28 @@ export function PlayableTable() {
         {changes.length > 0 && (
           <div className="pt-table-response" aria-label="Suggested table changes">
             <div>
-              <p>
-                <ChefHat /> {suggestionMessage}
-              </p>
-              <span className="pt-response-impact">
-                Shopping: {signed(suggestedTotal - selectedTotal)} in whole-pack purchases.
-                {source && source.attempts.length > 1
-                  ? ` Budget asked Menu to save ${money(first!.feedback.overage)}; ${last!.feasible ? "one revision passed" : "a conflict remains after one revision"}.`
-                  : ""}
-              </span>
+              <div className="pt-collaboration" aria-label="Assistant contributions">
+                <p>
+                  <ChefHat />
+                  <span>
+                    <strong>Menu</strong> {feedback?.menu}
+                  </span>
+                </p>
+                <p>
+                  <ShoppingBag />
+                  <span>
+                    <strong>Shopping</strong> {feedback?.shopping}
+                  </span>
+                </p>
+                <p>
+                  <CircleDollarSign />
+                  <span>
+                    <strong>Budget</strong> {feedback?.budget}
+                  </span>
+                </p>
+              </div>
               <span className="pt-suggested-cost">
-                Suggested table <strong>{money(suggestedTotal)}</strong>
+                If you use all remaining changes: <strong>{money(suggestedTotal)}</strong>
                 {suggestedTotal > plan.budget
                   ? ` · ${money(suggestedTotal - plan.budget)} over budget`
                   : ""}

@@ -319,7 +319,19 @@
         "name": "phone-max",
         "value": "480px"
       }
-    ]
+    ],
+    "typographyUpdate": {
+      "date": "2026-11-12",
+      "source": "src/playable.css :root --pt-type-*",
+      "title": 26,
+      "body": 16,
+      "label": 14,
+      "auxiliary": 13,
+      "amount": 32,
+      "brand": 20,
+      "bodyLineHeight": 1.5,
+      "note": "This role scale supersedes sizes in earlier illustrated-surface component previews."
+    }
   },
   "components": [
     {
