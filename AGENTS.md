@@ -34,3 +34,4 @@ use the editor.
 - Store confirmed plan, separate revision-bound proposal, and complete undo history in one planner controller; apply proposals atomically and persist only sample state locally as requested for this prototype.
 - Define food illustration palettes and all presentation tokens in the global stylesheet; reusable SVG ingredients inherit those tokens.
 - Derive the central pot's filled state and preparation notes from confirmed broth quantities; use ingredient popovers in both views and a persisted reviewed-plan snapshot for the toolbar's review status.
+- Each coordinated proposal records Menu output, Shopping's derived purchase rows, and Budget's purchase-based totals; alternatives rerun the same dependency chain so copy and highlights derive from calculations.

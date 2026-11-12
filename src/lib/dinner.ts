@@ -11,7 +11,14 @@ export const catalog: Item[] = [
   { id: 'broth', name: 'Two-way broth', unit: 'set', packageSize: 1, price: 8, vegetarian: true, base: 1 },
 ];
 export type Plan = { guests: number; vegetarians: number; budget: number; quantities: Record<ItemId, number>; kept: ItemId[] };
-export type Proposal = { revision: number; plan: Plan; alternatives: { title: string; explanation: string; plan: Plan }[] };
+export type Purchase = { item: Item; packs: number; purchasedQuantity: number; subtotal: number };
+export type Pipeline = {
+  menu: { id: 'menu'; plan: Plan; affected: ItemId[] };
+  shopping: { id: 'shopping'; source: 'menu'; purchases: Purchase[]; affected: ItemId[]; extraPacks: number };
+  budget: { id: 'budget'; source: 'shopping'; total: number; overBy: number; drivers: ItemId[] };
+};
+export type Alternative = { title: string; explanation: string; plan: Plan; pipeline: Pipeline };
+export type Proposal = { revision: number; plan: Plan; pipeline: Pipeline; alternatives: Alternative[] };
 export const initialPlan = (): Plan => ({ guests: 6, vegetarians: 0, budget: 120, kept: [], quantities: { napa: 800, enoki: 300, tofu: 600, beef: 900, lotus: 300, noodles: 500, bok: 300, broth: 1 } });
 export const packages = (quantity: number, item: Item) => Math.ceil(Math.max(0, quantity) / item.packageSize);
 export const cost = (plan: Plan) => catalog.reduce((sum, item) => sum + packages(plan.quantities[item.id], item) * item.price, 0);
@@ -25,14 +32,23 @@ export function menuAssistant(plan: Plan): Plan {
   const quantities = { ...plan.quantities };
   for (const item of catalog) {
     if (quantities[item.id] === 0) continue;
-    const required = item.id === 'broth' ? Math.ceil(plan.guests / 8) : item.id === 'beef' ? Math.ceil((plan.guests - plan.vegetarians) * 150) : Math.ceil(item.base * plan.guests / 6 + (['tofu', 'enoki', 'lotus', 'bok'].includes(item.id) ? plan.vegetarians * 100 : 0));
+    const required = item.id === 'broth' ? Math.ceil(plan.guests / 8) : item.id === 'beef' ? Math.ceil((plan.guests - plan.vegetarians) * 150) : Math.ceil((item.base * plan.guests / 6 + (['tofu', 'enoki', 'lotus', 'bok'].includes(item.id) ? plan.vegetarians * 100 : 0)) / 50) * 50;
     quantities[item.id] = plan.kept.includes(item.id) ? Math.max(quantities[item.id], required) : required;
   }
   return { ...plan, quantities };
 }
-export const shoppingAssistant = (plan: Plan) => catalog.filter(item => plan.quantities[item.id] > 0).map(item => ({ item, packs: packages(plan.quantities[item.id], item), subtotal: packages(plan.quantities[item.id], item) * item.price }));
-export function budgetAssistant(plan: Plan): Proposal['alternatives'] {
-  if (cost(plan) <= plan.budget || plan.kept.includes('beef') || plan.quantities.beef === 0 || plan.quantities.tofu === 0) return [];
+export const shoppingAssistant = (plan: Plan): Purchase[] => catalog.filter(item => plan.quantities[item.id] > 0).map(item => ({ item, packs: packages(plan.quantities[item.id], item), purchasedQuantity: packages(plan.quantities[item.id], item) * item.packageSize, subtotal: packages(plan.quantities[item.id], item) * item.price }));
+// Every downstream stage consumes the output above it, including alternative recalculations.
+export function coordinate(plan: Plan, confirmed: Plan): Pipeline {
+  const menu: Pipeline['menu'] = { id: 'menu', plan, affected: catalog.filter(item => plan.quantities[item.id] !== confirmed.quantities[item.id]).map(item => item.id) };
+  const purchases = shoppingAssistant(menu.plan);
+  const shopping: Pipeline['shopping'] = { id: 'shopping', source: menu.id, purchases, affected: purchases.filter(row => row.packs !== packages(confirmed.quantities[row.item.id], row.item)).map(row => row.item.id), extraPacks: purchases.reduce((sum, row) => sum + row.packs - packages(confirmed.quantities[row.item.id], row.item), 0) };
+  const total = shopping.purchases.reduce((sum, row) => sum + row.subtotal, 0);
+  const budget: Pipeline['budget'] = { id: 'budget', source: shopping.id, total, overBy: Math.max(0, total - plan.budget), drivers: [...shopping.purchases].sort((a,b) => b.subtotal - a.subtotal).slice(0,2).map(row => row.item.id) };
+  return { menu, shopping, budget };
+}
+export function budgetAssistant(plan: Plan, purchases = shoppingAssistant(plan)): Omit<Alternative, 'pipeline'>[] {
+  if (purchases.reduce((sum,row)=>sum+row.subtotal,0) <= plan.budget || plan.kept.includes('beef') || plan.quantities.beef === 0 || plan.quantities.tofu === 0) return [];
   const options = [
     { title: 'A little less beef, plenty to share', explanation: 'Use two beef packs and keep the generous tofu and vegetable portions.', quantities: { ...plan.quantities, beef: Math.min(plan.quantities.beef, 600) } },
     { title: 'Keep more beef, simplify the vegetables', explanation: 'Use three beef packs, two enoki packs, and one lotus root pack.', quantities: { ...plan.quantities, beef: Math.min(plan.quantities.beef, 900), enoki: Math.min(plan.quantities.enoki, 300), lotus: Math.min(plan.quantities.lotus, 300) } },
@@ -41,7 +57,9 @@ export function budgetAssistant(plan: Plan): Proposal['alternatives'] {
 }
 export function review(plan: Plan, revision: number): Proposal {
   const proposed = menuAssistant(plan);
-  return { revision, plan: proposed, alternatives: budgetAssistant(proposed) };
+  const pipeline = coordinate(proposed, plan);
+  const alternatives = budgetAssistant(proposed, pipeline.shopping.purchases).map(option => ({ ...option, pipeline: coordinate(option.plan, plan) }));
+  return { revision, plan: proposed, pipeline, alternatives };
 }
 export type PlannerState = { plan: Plan; revision: number; proposal: Proposal | null; history: Plan[]; message: string };
 export const initialState = (): PlannerState => ({ plan: initialPlan(), revision: 1, proposal: null, history: [], message: '' });

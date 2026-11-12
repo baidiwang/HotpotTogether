@@ -25,6 +25,21 @@ describe('shared dinner rules', () => {
     const p = review(preferences(initialPlan(),{guests:8,vegetarians:1}),2);
     expect(cost(p.plan)).toBe(146); expect(p.plan.quantities.tofu).toBe(900); expect(p.alternatives.map(a=>cost(a.plan))).toEqual([114,115]);
   });
+  it('Menu feeds Shopping purchases which feed the Budget estimate', () => {
+    const p = review(preferences(initialPlan(), {guests:8,vegetarians:1}), 2);
+    expect(p.pipeline.shopping.source).toBe(p.pipeline.menu.id);
+    expect(p.pipeline.budget.source).toBe(p.pipeline.shopping.id);
+    expect(p.pipeline.menu.plan.quantities.napa).toBe(1100);
+    expect(p.pipeline.menu.plan.quantities.noodles).toBe(700);
+    expect(p.pipeline.shopping.extraPacks).toBe(8);
+    expect(p.pipeline.budget.total).toBe(p.pipeline.shopping.purchases.reduce((sum,row)=>sum+row.subtotal,0));
+    expect(p.pipeline.budget.overBy).toBe(26);
+    expect(p.alternatives.map(a=>a.pipeline.budget.total)).toEqual([114,115]);
+  });
+  it('550 g planned tofu purchases two 300 g packs, totaling 600 g and $8', () => {
+    const row = shoppingAssistant({...initialPlan(),quantities:{...initialPlan().quantities,tofu:550}}).find(r=>r.item.id==='tofu');
+    expect(row?.packs).toBe(2); expect(row?.purchasedQuantity).toBe(600); expect(row?.subtotal).toBe(8);
+  });
   it('does not reduce kept beef and reports no feasible budget alternative', () => {
     const p = review({...preferences(initialPlan(),{guests:8,vegetarians:1}),kept:['beef']},2);
     expect(p.plan.quantities.beef).toBe(1050); expect(p.alternatives).toHaveLength(0);
