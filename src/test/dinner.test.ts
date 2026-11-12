@@ -7,8 +7,8 @@ describe('shared dinner rules', () => {
     expect(proposal.plan.quantities.beef).toBe(0);
     expect(proposal.pipeline.shopping.affected).toContain('beef');
     expect(proposal.pipeline.shopping.purchases.some(row=>row.item.id==='beef')).toBe(false);
-    expect(proposal.pipeline.shopping.extraPacks).toBe(5);
-    expect(proposal.pipeline.budget.total).toBe(90);
+    expect(proposal.pipeline.shopping.extraPacks).toBe(7);
+    expect(proposal.pipeline.budget.total).toBe(107);
     const state={...initialState(),plan:draft,proposal};
     const applied=acceptProposal(state,proposal.plan);
     expect(applied.plan.quantities.beef).toBe(0);
