@@ -36,10 +36,11 @@ previous plan; Reset cancels pending work and restores the initial sample plan.
   guests, vegetarian guests, the fixed catalog, package prices, removed items,
   kept minimum quantities, and the user's budget.
 - **Shopping**: deterministic whole-pack rounding from those recommended quantities.
-- **Budget**: deterministic sum of Shopping's package costs. If needed, two
-  rule-based tradeoffs are recalculated through the same pipeline and shown only
-  when they respect constraints and fit the budget. These are distinct interface
-  roles, not three independent autonomous AI agents. Prices remain sample USD
+- **Budget**: deterministic sum of Shopping's package costs and validation of
+  guest, kept-item, portion and budget constraints. Failed checks return structured
+  feedback to Menu for **one** revision, followed by fresh Shopping and Budget
+  calculations. These are distinct interface roles, not three independent
+  autonomous AI agents. Prices remain sample USD
   estimates in both modes; there is no live store pricing or checkout.
 
 Both sample and live recommendations must preserve preferences and removed items,
@@ -146,8 +147,8 @@ of the new Menu function has therefore been verified. A local production build
 is not evidence of a live deployment.
 
 Live errors (missing setup, access/credit/rate-limit errors, timeout, invalid model
-output, network failure) are displayed explicitly. There is a 30-second server
-request deadline and no automatic retry or sample substitution. Users can retry
+output, network failure) are displayed explicitly. There is a 30-second deadline for each Menu call
+(at most two calls per run) and no automatic retry or sample substitution. Users can retry
 or explicitly switch to Sample mode. Client edits, Undo, Reset, mode changes and
 Cancel abort the pending client request and ignore late results; upstream work may
 already have started and still incur usage. Sample-mode plans/history are stored
@@ -158,7 +159,56 @@ This is a competition prototype without login or a shared database. The server
 function is CSRF protected but not authenticated or backed by a distributed quota;
 configure hosting access/usage limits for a credential-enabled public demo.
 
-### Real preview verification — November 11, 2026
+### Bounded collaboration and shared review
+
+The example **Two more friends · same budget · keep beef (review)** starts from
+`initialPlan()` (six people, $120 and the original quantities), changes attendance
+to eight with one vegetarian, keeps at least 900 g beef, and starts review. It
+never applies a recommendation. Undo history retains the previous complete plan.
+
+Each accepted review request carries a unique request ID and plan revision. The
+run records the exact Menu candidate, Shopping's whole-pack purchases and surplus,
+Budget's total and violations, and any revision changes. A feasible initial
+candidate finishes after one attempt. Otherwise the feedback includes the actual
+overage, package thresholds and potential pack savings, protected minimums and
+permitted changes. Menu may revise once; Shopping and Budget then recalculate from
+that exact revision. After two unsuccessful attempts the result is unresolved,
+Apply is disabled, and the user chooses whether to change budget, attendance or
+kept items. The app never relaxes a constraint itself.
+
+Live mode uses the existing Lovable gateway for both Menu attempts. Sample mode
+runs the same dependency and validation path with transparent portion and
+package-saving rules, with no model calls or processing delays. Catalog/schema
+errors stop the run honestly instead of inventing calculations. If a revision
+request fails, the completed initial attempt remains available as an error record;
+it cannot be applied. Request cancellation also propagates to the server's
+upstream call where the runtime supports disconnect signals.
+
+In review, **Keep another ingredient** (or an ingredient's existing Keep checkbox)
+updates only kept constraints, leaves confirmed quantities untouched, increments
+the plan revision and invalidates the old proposal. **Revise with this constraint**
+starts a new bounded run with a new request ID. Only the latest validated result
+matching both identities can be applied. Earlier attempts are expandable; their
+figures are labeled as historical, and role selection highlights the current
+candidate without switching away from the selected table/list view.
+
+The $120 example does not guarantee a conflict: a real model may propose a
+feasible first pass and should stop there. The sample portion rules actually
+produce $146, send $26 of overage feedback, and revise to $120 while preserving
+900 g beef. Named fixtures in `src/test/fixtures/plans.ts` cover a genuinely tighter
+$100 budget (sample $146 → $100) and an unresolved $50 budget (sample $146 → $84).
+In the $50 case the kept beef and selected broth alone already cost $56. The
+sample search's $84 result is not claimed to be a global optimum.
+
+The review uses a sticky 328–344 px side panel from a 1024 px viewport, including
+1440×900 and 1280×800. Only the tabletop art composition scales; type size and the
+page are not zoomed down. Below 1024 px, review is a non-modal fixed bottom sheet
+with internal scrolling and persistent decision controls. Opening it brings the
+food workspace into view, leaving the pot/canvas visible above it. It is never
+appended beneath the entire tabletop. Desktop screenshots and layout measurements
+were taken at visual viewport scale 1.
+
+### Earlier real-model integration verification — November 11, 2026
 
 The implementation was committed as `de28b47` and pushed to the connected `main`
 branch. Lovable's editor showed the GitHub sync and ran the updated full-stack

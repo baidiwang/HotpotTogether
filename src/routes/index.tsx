@@ -83,32 +83,30 @@ function Index() {
     requestReview,
     cancelReview,
     loaded,
+    editPlan,
+    setKept,
+    startExample,
+    reviewOpen,
+    userRequest,
+    reviewNotice,
+    lastRun,
+    failedAttempts,
+    dismissReview,
   } = usePlanner();
   const { plan, proposal } = state;
   const [view, setView] = useState<"table" | "shopping">("table");
   const [selected, setSelected] = useState<ItemId | null>(null);
   const [active, setActive] = useState<Assistant | null>(null);
-  const [choice, setChoice] = useState<number | null>(null);
   const [applied, setApplied] = useState(false);
-  const preview = proposal
-    ? choice === null
-      ? proposal.plan
-      : (proposal.alternatives[choice]?.plan ?? proposal.plan)
-    : null;
-  const pipeline = proposal
-    ? choice === null
-      ? proposal.pipeline
-      : (proposal.alternatives[choice]?.pipeline ?? proposal.pipeline)
-    : null;
+  const preview = proposal?.plan ?? null;
+  const pipeline = proposal?.pipeline ?? null;
   const confirmedTotal = cost(plan);
   const dirty = JSON.stringify(plan) !== JSON.stringify(reviewedPlan);
   const selectAssistant = (id: Assistant) => {
     setActive((current) => (current === id ? null : id));
-    setView("table");
   };
   const update = (next: Plan, message = "") => {
-    setState((s) => updatePlan(s, next, message));
-    setChoice(null);
+    editPlan(next, message);
     setApplied(false);
   };
   const changePreferences = (changes: Partial<Pick<Plan, "guests" | "vegetarians" | "budget">>) =>
@@ -129,7 +127,11 @@ function Index() {
   const relevant = (item: Item) =>
     active === "budget"
       ? (pipeline ?? coordinate(plan, plan)).budget.drivers.includes(item.id)
-      : false;
+      : active === "menu"
+        ? !!pipeline?.menu.affected.includes(item.id)
+        : active === "shopping"
+          ? !!pipeline?.shopping.affected.includes(item.id)
+          : false;
   const specific = (item: Item, id: Assistant) => {
     if (!preview || !pipeline) return "";
     if (id === "menu")
@@ -212,7 +214,6 @@ function Index() {
     if (accepted === state) return;
     setState(accepted);
     setReviewedPlan(preview);
-    setChoice(null);
     setActive(null);
     setApplied(true);
   };
@@ -271,7 +272,8 @@ function Index() {
                   ? "Local sample suggestions, not live AI. Menu uses portion rules. Your sample plan is saved in this browser."
                   : "Menu uses AI to recommend catalog ingredients and quantities. Live mode changes last for this visit."}{" "}
                 Shopping calculates whole packs from Menu’s quantities. Budget calculates sample USD
-                costs and rule-based alternatives. Recommendations change the plan only after Apply.
+                costs and sends constraint feedback to Menu for at most one revision.
+                Recommendations change the plan only after Apply.
               </p>
             </PopoverContent>
           </Popover>
@@ -283,7 +285,6 @@ function Index() {
             disabled={!state.history.length}
             onClick={() => {
               setState(undo);
-              setChoice(null);
               setSelected(null);
               setApplied(false);
               setActive(null);
@@ -298,7 +299,6 @@ function Index() {
             onClick={() => {
               setState((s) => ({ ...initialState(), revision: s.revision + 1, message: "" }));
               setReviewedPlan(initialPlan());
-              setChoice(null);
               setSelected(null);
               setActive(null);
               setApplied(false);
@@ -310,25 +310,36 @@ function Index() {
         </div>
       </header>
       <div className="planning-line">
-        <DinnerPreferences plan={plan} onChange={changePreferences} />
+        <DinnerPreferences
+          plan={plan}
+          onChange={changePreferences}
+          onExample={() => {
+            setView("table");
+            setActive(null);
+            setSelected(null);
+            setApplied(false);
+            void startExample();
+          }}
+        />
         <div className="review-controls">
           <span className="quiet-status">
             {pending
               ? "Menu is preparing recommendations…"
               : proposal
-                ? "Awaiting your approval"
+                ? proposal.result === "feasible"
+                  ? "Awaiting your approval"
+                  : "Constraints need your decision"
                 : dirty
                   ? "Settings changed · review needed"
                   : applied
                     ? "Plan applied"
                     : "Plan up to date"}
           </span>
-          {!proposal && (
+          {!reviewOpen && (
             <Button
               size="sm"
               disabled={pending || !loaded}
               onClick={() => {
-                setChoice(null);
                 setActive(null);
                 setSelected(null);
                 setApplied(false);
@@ -382,25 +393,7 @@ function Index() {
           </Button>
         )}
       </div>
-      <div className="review-feedback" aria-live="polite">
-        {error && (
-          <div role="alert" className="review-error">
-            <p>{error}</p>
-            {mode === "live" && (
-              <Button variant="outline" size="sm" onClick={() => setMode("sample")}>
-                Switch to Sample mode
-              </Button>
-            )}
-          </div>
-        )}
-        {pending && (
-          <p role="status">
-            Menu recommends ingredients → Shopping derives whole packs → Budget checks costs.
-            Editing the plan cancels this review.
-          </p>
-        )}
-      </div>
-      <main id="shared-workspace" className={`workspace ${proposal ? "has-proposal" : ""}`}>
+      <main id="shared-workspace" className={`workspace ${reviewOpen ? "has-proposal" : ""}`}>
         <div className="shared-plan">
           <div className="plan-view-label" aria-live="polite">
             {active === "menu"
@@ -412,6 +405,12 @@ function Index() {
                   : proposal
                     ? "Confirmed portions → proposed portions"
                     : ""}
+            {reviewOpen && plan.vegetarians > 0 && plan.quantities.broth > 0 && (
+              <span className="review-preparation-note">
+                <Leaf />
+                Separate vegetarian side
+              </span>
+            )}
           </div>
           {view === "table" ? (
             <div className="table-board" aria-label="Shared dinner table">
@@ -537,21 +536,43 @@ function Index() {
             </div>
           )}
         </div>
-        {proposal && pipeline && (
+        {reviewOpen && (
           <JointProposal
             proposal={proposal}
-            pipeline={pipeline}
             confirmed={plan}
+            revision={state.revision}
+            requestId={state.requestId}
             confirmedTotal={confirmedTotal}
-            choice={choice}
-            onChoice={setChoice}
+            mode={mode}
+            pending={pending}
+            error={error}
+            userRequest={userRequest}
+            notice={reviewNotice}
+            lastRun={lastRun}
+            failedAttempts={failedAttempts}
             active={active}
             onSelect={selectAssistant}
             onApply={apply}
             onDismiss={() => {
-              setState((s) => ({ ...s, proposal: null, message: "" }));
-              setChoice(null);
+              dismissReview();
               setActive(null);
+            }}
+            onRevise={() => {
+              setSelected(null);
+              setApplied(false);
+              void requestReview();
+            }}
+            onKeep={(id, kept) => {
+              setKept(id, kept);
+              setApplied(false);
+            }}
+            onBudget={(budget) => changePreferences({ budget })}
+            onGuests={() => {
+              const button = document.querySelector<HTMLButtonElement>(
+                '[aria-label="Edit guests"]',
+              );
+              button?.scrollIntoView({ block: "center" });
+              button?.click();
             }}
           />
         )}

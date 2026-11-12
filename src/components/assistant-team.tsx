@@ -1,6 +1,22 @@
-import { ChefHat, ShoppingBag, CircleDollarSign, ChevronDown, ArrowRight } from "lucide-react";
+import {
+  ChefHat,
+  ShoppingBag,
+  CircleDollarSign,
+  ChevronDown,
+  ArrowRight,
+  LockKeyhole,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { catalog, quantityLabel, type Pipeline, type Plan, type Proposal } from "@/lib/dinner";
+import {
+  catalog,
+  quantityLabel,
+  type Pipeline,
+  type Plan,
+  type Proposal,
+  type PlannerMode,
+  type ItemId,
+  type ReviewAttempt,
+} from "@/lib/dinner";
 export const assistants = [
   { id: "menu", name: "Menu", icon: ChefHat },
   { id: "shopping", name: "Shopping", icon: ShoppingBag },
@@ -40,10 +56,12 @@ export function AssistantTeam({
               <small>
                 {pending
                   ? id === "menu"
-                    ? "Recommending…"
-                    : "Waiting for Menu"
+                    ? "Reviewing…"
+                    : "Awaiting Menu"
                   : proposal
-                    ? "Proposal ready"
+                    ? proposal.result === "feasible"
+                      ? "Review complete"
+                      : "Conflict unresolved"
                     : applied
                       ? "Applied"
                       : "Ready"}
@@ -55,83 +73,175 @@ export function AssistantTeam({
     </div>
   );
 }
-export function contributionText(
-  id: Assistant,
-  pipeline: Pipeline,
-  confirmed: Plan,
-  proposal: Proposal,
-) {
+export function contributionText(id: Assistant, pipeline: Pipeline, confirmed: Plan) {
   if (id === "menu") {
     const changed = catalog.filter((item) => pipeline.menu.affected.includes(item.id));
-    const plant = changed.filter(
-      (item) =>
-        ["tofu", "enoki"].includes(item.id) &&
-        pipeline.menu.plan.quantities[item.id] > confirmed.quantities[item.id],
+    if (!changed.length) return "Selected quantities are unchanged.";
+    return (
+      changed
+        .slice(0, 2)
+        .map((item) =>
+          pipeline.menu.plan.quantities[item.id] === 0
+            ? `Remove ${item.name.toLowerCase()}`
+            : `${item.name}: ${quantityLabel(pipeline.menu.plan.quantities[item.id], item)}`,
+        )
+        .join(" · ") + (changed.length > 2 ? ` · ${changed.length - 2} more changes` : "")
     );
-    const items = (plant.length ? plant : changed)
-      .slice(0, 2)
-      .map(
-        (item) =>
-          `${quantityLabel(pipeline.menu.plan.quantities[item.id], item)} ${item.name.toLowerCase()}`,
-      );
-    return items.length
-      ? `Plan ${items.join(" and ")} for ${pipeline.menu.plan.guests} guests.`
-      : "Current portions already suit this group.";
   }
-  if (id === "shopping")
-    return `${pipeline.shopping.purchases.reduce((sum, row) => sum + row.packs, 0)} whole packs${pipeline.shopping.extraPacks === 0 ? "" : ` · ${Math.abs(pipeline.shopping.extraPacks)} ${pipeline.shopping.extraPacks > 0 ? "more" : "fewer"} than confirmed`}.`;
-  return pipeline.budget.overBy > 0
-    ? `${money(pipeline.budget.total)} in purchases · ${money(pipeline.budget.overBy)} over limit.`
-    : `${money(pipeline.budget.total)} in purchases · ${money(pipeline.menu.plan.budget - pipeline.budget.total)} remaining.`;
+  if (id === "shopping") {
+    const packs = pipeline.shopping.purchases.reduce((sum, row) => sum + row.packs, 0);
+    const surplus = pipeline.shopping.implications
+      .filter((row) => catalog.find((item) => item.id === row.id)?.unit === "g")
+      .reduce((sum, row) => sum + row.surplus, 0);
+    return `${packs} whole packs · ${surplus} g package surplus.`;
+  }
+  return `${money(pipeline.budget.total)} in purchases · ${pipeline.budget.overBy > 0 ? `${money(pipeline.budget.overBy)} over ${money(confirmed.budget)}` : `${money(confirmed.budget - pipeline.budget.total)} remaining`}.`;
+}
+function AttemptRecord({ attempt }: { attempt: ReviewAttempt }) {
+  return (
+    <div className="attempt-record">
+      <p>
+        <strong>Menu:</strong> {attempt.summary}
+      </p>
+      <p>
+        <strong>Shopping:</strong>{" "}
+        {attempt.pipeline.shopping.purchases.reduce((sum, row) => sum + row.packs, 0)} whole packs
+        from those quantities.
+      </p>
+      <p>
+        <strong>Budget:</strong> {money(attempt.feedback.total)} / {money(attempt.feedback.limit)} ·{" "}
+        {attempt.feasible ? "Within budget and constraints" : attempt.feedback.violations.join(" ")}
+      </p>
+      <div className="attempt-quantities">
+        {catalog.map((item) => {
+          const row = attempt.pipeline.shopping.purchases.find((row) => row.item.id === item.id);
+          return (
+            <div key={item.id}>
+              <span>
+                {item.name} · {quantityLabel(attempt.pipeline.menu.plan.quantities[item.id], item)}
+              </span>
+              <span>
+                {row?.packs ?? 0} packs · {money(row?.subtotal ?? 0)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {attempt.feedback.violations.length > 0 && (
+        <>
+          <strong>Feedback sent to Menu</strong>
+          <p>
+            {money(attempt.feedback.overage)} actual overage. Protected:{" "}
+            {attempt.feedback.protectedIngredients.length
+              ? attempt.feedback.protectedIngredients
+                  .map((row) => `${row.id} ≥ ${row.minimum}`)
+                  .join(", ")
+              : "none"}
+            . Attendance and budget cannot change.
+          </p>
+          <div className="feedback-packages">
+            {attempt.feedback.packageImplications
+              .filter((row) => row.surplus > 0)
+              .map((row) => (
+                <p key={row.id}>
+                  {catalog.find((item) => item.id === row.id)?.name}: {row.planned} planned →{" "}
+                  {row.purchased} purchased; reduce to {row.lowerPackThreshold} for one fewer pack (
+                  {money(row.saving)}), only if constraints allow.
+                </p>
+              ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 export function JointProposal({
   proposal,
-  pipeline,
   confirmed,
+  revision,
+  requestId,
   confirmedTotal,
-  choice,
-  onChoice,
+  mode,
+  pending,
+  error,
+  userRequest,
+  notice,
+  lastRun,
+  failedAttempts,
   active,
   onSelect,
   onApply,
   onDismiss,
+  onRevise,
+  onKeep,
+  onBudget,
+  onGuests,
 }: {
-  proposal: Proposal;
-  pipeline: Pipeline;
+  proposal: Proposal | null;
   confirmed: Plan;
+  revision: number;
+  requestId: string | null;
   confirmedTotal: number;
-  choice: number | null;
-  onChoice: (n: number | null) => void;
+  mode: PlannerMode;
+  pending: boolean;
+  error: string | null;
+  userRequest: string;
+  notice: string;
+  lastRun: Proposal | null;
+  failedAttempts: ReviewAttempt[];
   active: Assistant | null;
   onSelect: (id: Assistant) => void;
   onApply: () => void;
   onDismiss: () => void;
+  onRevise: () => void;
+  onKeep: (id: ItemId, kept: boolean) => void;
+  onBudget: (budget: number) => void;
+  onGuests: () => void;
 }) {
-  const delta = pipeline.budget.total - confirmedTotal;
+  const latest = proposal?.attempts.at(-1);
+  const pipeline = proposal?.pipeline;
+  const current = !!proposal && proposal.revision === revision && proposal.requestId === requestId;
+  const canApply = current && proposal.result === "feasible" && !pending && !error;
+  const previous = proposal?.attempts[0];
   return (
     <section
       id="team-proposal"
       tabIndex={-1}
       className="joint-proposal"
-      aria-label="Joint proposal"
+      aria-label="Collaboration review"
     >
       <div className="proposal-header">
         <div className="proposal-heading">
-          <h2>Team proposal</h2>
-          <div className="mini-team">
-            {assistants.map(({ id, icon: Icon }) => (
-              <span key={id} className={`assistant-avatar agent-${id}`}>
-                <Icon />
-              </span>
-            ))}
-          </div>
+          <h2>Review together</h2>
+          <span className="review-source">
+            {mode === "sample" ? "Sample rules" : "Live Menu AI"}
+          </span>
         </div>
         <p className="approval-status">
-          {proposal.mode === "sample" ? "Sample proposal" : "AI Menu proposal"} · needs your
-          approval
+          {pending
+            ? "Review in progress"
+            : error
+              ? "Review failed"
+              : notice
+                ? "Revision needed"
+                : proposal?.result === "unresolved"
+                  ? "Conflict unresolved"
+                  : "Needs your approval"}
         </p>
       </div>
       <div className="proposal-content">
+        <p className="current-request">{userRequest}</p>
+        <p className="review-kept">
+          <LockKeyhole size={12} />{" "}
+          {confirmed.kept.length
+            ? confirmed.kept
+                .map((id) => {
+                  const item = catalog.find((item) => item.id === id)!;
+                  return `${item.name} ≥ ${quantityLabel(confirmed.quantities[id], item)}`;
+                })
+                .join(" · ")
+            : "No ingredients kept"}
+        </p>
         <div className="contribution-list">
           {assistants.map(({ id, name, icon: Icon }) => (
             <div key={id}>
@@ -140,144 +250,265 @@ export function JointProposal({
                 className={`contribution agent-${id}`}
                 aria-label={`${name} contribution`}
                 aria-expanded={active === id}
-                aria-controls={`${id}-calculations`}
                 aria-pressed={active === id}
                 onClick={() => onSelect(id)}
               >
                 <Icon />
                 <span>
-                  <strong>{name}</strong>
-                  <small>
-                    {id === "menu"
-                      ? proposal.mode === "live"
-                        ? choice === null
-                          ? "AI ingredient recommendations"
-                          : "AI portions + Budget tradeoff"
-                        : "Sample portion rules"
-                      : id === "shopping"
-                        ? "Calculated from Menu’s quantities"
-                        : "Calculated from Shopping’s packs"}
-                  </small>
-                  <span>{contributionText(id, pipeline, confirmed, proposal)}</span>
+                  <strong>
+                    {name}
+                    <small>
+                      {id === "menu"
+                        ? mode === "sample"
+                          ? "Sample recommendation"
+                          : "Model recommendation"
+                        : id === "shopping"
+                          ? "Whole-pack calculation"
+                          : "Constraint check"}
+                    </small>
+                  </strong>
+                  <span>
+                    {pipeline
+                      ? contributionText(id, pipeline, confirmed)
+                      : pending
+                        ? id === "menu"
+                          ? "Requesting recommendations; one feedback revision if needed."
+                          : "Waiting for Menu’s quantities."
+                        : error
+                          ? "No validated result from this request."
+                          : "Constraints changed; review again."}
+                  </span>
                 </span>
                 <ChevronDown />
               </Button>
+              {active === id && pipeline && (
+                <div
+                  className="contribution-calculations"
+                  role="region"
+                  aria-label={`${name} calculations`}
+                  tabIndex={0}
+                >
+                  {id === "menu" ? (
+                    <>
+                      <p>{latest?.summary}</p>
+                      {catalog
+                        .filter((item) => pipeline.menu.affected.includes(item.id))
+                        .map((item) => (
+                          <div key={item.id}>
+                            <span>{item.name}</span>
+                            <span>
+                              {quantityLabel(confirmed.quantities[item.id], item)} →{" "}
+                              {quantityLabel(pipeline.menu.plan.quantities[item.id], item)}
+                            </span>
+                          </div>
+                        ))}
+                    </>
+                  ) : id === "shopping" ? (
+                    catalog
+                      .filter((item) => pipeline.shopping.affected.includes(item.id))
+                      .map((item) => {
+                        const row = pipeline.shopping.purchases.find(
+                          (row) => row.item.id === item.id,
+                        );
+                        return (
+                          <div key={item.id}>
+                            <span>{item.name}</span>
+                            <span>
+                              {pipeline.menu.plan.quantities[item.id]}
+                              {item.unit} → {row?.packs ?? 0} × {item.packageSize}
+                              {item.unit}
+                              {row
+                                ? ` · ${row.purchasedQuantity - pipeline.menu.plan.quantities[item.id]}${item.unit} extra`
+                                : ""}
+                            </span>
+                          </div>
+                        );
+                      })
+                  ) : (
+                    <>
+                      <p>
+                        {latest?.feedback.violations.length
+                          ? latest.feedback.violations.join(" ")
+                          : "All catalog, preference, kept-item and budget checks passed."}
+                      </p>
+                      {pipeline.shopping.purchases.map((row) => (
+                        <div key={row.item.id}>
+                          <span>{row.item.name}</span>
+                          <span>
+                            {row.packs} × {money(row.item.price)} = {money(row.subtotal)}
+                          </span>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
-        {active !== null && (
-          <div
-            id={`${active}-calculations`}
-            className="contribution-calculations"
-            tabIndex={0}
-            role="region"
-            aria-label={`${assistants.find((a) => a.id === active)?.name} calculations`}
-          >
-            {active === "menu" ? (
-              <>
-                <p>
-                  {choice !== null ? "Menu’s initial recommendation: " : ""}
-                  {proposal.summary}
-                </p>
-                {catalog
-                  .filter((item) => pipeline.menu.affected.includes(item.id))
-                  .map((item) => (
-                    <div key={item.id}>
-                      <span>{item.name}</span>
-                      <span>
-                        {quantityLabel(confirmed.quantities[item.id], item)} →{" "}
-                        {quantityLabel(pipeline.menu.plan.quantities[item.id], item)}
-                      </span>
-                    </div>
-                  ))}
-              </>
-            ) : active === "shopping" ? (
-              pipeline.shopping.purchases
-                .filter((row) => pipeline.shopping.affected.includes(row.item.id))
-                .map((row) => (
-                  <div key={row.item.id}>
-                    <span>{row.item.name}</span>
-                    <span>
-                      {row.packs} × {row.item.packageSize}
-                      {row.item.unit} = {row.purchasedQuantity}
-                      {row.item.unit}
-                    </span>
-                  </div>
-                ))
+        {proposal && latest && (
+          <div className="revision-explanation">
+            {proposal.attempts.length === 1 ? (
+              <p>
+                First attempt{" "}
+                {latest.feasible ? "passed every check. No revision needed." : "did not pass."}
+              </p>
             ) : (
-              pipeline.shopping.purchases
-                .filter((row) => pipeline.budget.drivers.includes(row.item.id))
-                .map((row) => (
-                  <div key={row.item.id}>
-                    <span>{row.item.name}</span>
-                    <span>
-                      {row.packs} × {money(row.item.price)} = {money(row.subtotal)}
-                    </span>
-                  </div>
-                ))
+              <p>
+                <strong>Menu revised once.</strong>{" "}
+                {previous && previous.feedback.overage > 0
+                  ? `${money(previous.feedback.overage)} over budget → ${money(latest.feedback.overage)} over.`
+                  : "Constraint feedback was checked again."}{" "}
+                Changed{" "}
+                {latest.changedFromPrevious.length
+                  ? latest.changedFromPrevious
+                      .map((id) => catalog.find((item) => item.id === id)?.name.toLowerCase())
+                      .join(", ")
+                  : "no quantities"}
+                .{" "}
+                {latest.feasible
+                  ? "All checks now pass."
+                  : "No valid plan found after two attempts."}
+              </p>
             )}
           </div>
+        )}
+        {notice && (
+          <p className="revision-explanation" role="status">
+            {notice}
+          </p>
+        )}
+        {error && (
+          <p className="conflict-note" role="alert">
+            {error} No plan was applied.
+          </p>
+        )}
+        <details id="review-kept-editor" className="keep-editor">
+          <summary>Keep another ingredient</summary>
+          <div>
+            {catalog
+              .filter((item) => confirmed.quantities[item.id] > 0)
+              .map((item) => (
+                <label key={item.id}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Keep ${item.name} during review`}
+                    checked={confirmed.kept.includes(item.id)}
+                    onChange={(event) => onKeep(item.id, event.target.checked)}
+                  />
+                  {item.name}
+                </label>
+              ))}
+          </div>
+        </details>
+        {proposal && proposal.attempts.length > 1 && (
+          <details className="attempt-history">
+            <summary>
+              Initial attempt · {money(proposal.attempts[0]!.feedback.total)} · revision needed
+            </summary>
+            <AttemptRecord attempt={proposal.attempts[0]!} />
+          </details>
+        )}
+        {failedAttempts.map((attempt) => (
+          <details className="attempt-history" key={attempt.number}>
+            <summary>
+              Completed attempt {attempt.number} before error · {money(attempt.feedback.total)}
+            </summary>
+            <AttemptRecord attempt={attempt} />
+          </details>
+        ))}
+        {!proposal && lastRun && (
+          <details className="attempt-history">
+            <summary>Previous review · outdated</summary>
+            <p>
+              Request {lastRun.requestId} · plan revision {lastRun.revision}. These quantities are
+              not an actionable proposal.
+            </p>
+            {lastRun.attempts.map((attempt) => (
+              <AttemptRecord key={attempt.number} attempt={attempt} />
+            ))}
+          </details>
+        )}
+        {proposal && (
+          <details className="attempt-history">
+            <summary>
+              Current run record · {proposal.attempts.length}{" "}
+              {proposal.attempts.length === 1 ? "attempt" : "attempts"}
+            </summary>
+            <p>
+              Request {proposal.requestId} · plan revision {proposal.revision}
+            </p>
+            <AttemptRecord attempt={latest!} />
+            <p>
+              Result: {proposal.result === "feasible" ? "Feasible plan" : "Unresolved conflict"}.
+              Confirmed quantities remain unchanged until Apply.
+            </p>
+          </details>
         )}
       </div>
       <div className="proposal-decision">
         <div className="decision-cost">
           <span>
-            Confirmed <strong>{money(confirmedTotal)}</strong>
+            Confirmed<strong>{money(confirmedTotal)}</strong>
           </span>
           <ArrowRight />
           <span>
-            Proposed <strong>{money(pipeline.budget.total)}</strong>
+            {pipeline ? "Proposed" : "Awaiting review"}
+            <strong>{pipeline ? money(pipeline.budget.total) : "—"}</strong>
           </span>
         </div>
-        <p className="cost-change">
-          {delta === 0
-            ? "No cost change"
-            : `${money(Math.abs(delta))} ${delta > 0 ? "increase" : "decrease"}`}{" "}
-          · sample prices
-        </p>
-        {pipeline.budget.overBy > 0 && (
-          <p className="conflict-note">
-            {money(pipeline.budget.overBy)} over the {money(confirmed.budget)} limit.
-            {!proposal.alternatives.length
-              ? " Change budget, guests, or kept items to proceed."
-              : " Choose a budget alternative."}
+        {proposal && (
+          <p className={`review-result ${canApply ? "is-feasible" : "is-conflict"}`} role="status">
+            {canApply
+              ? "Within budget · all constraints checked"
+              : latest?.feedback.violations.join(" ")}
           </p>
         )}
-        {proposal.alternatives.length > 0 && (
-          <div className="alternative-options">
-            <span>Budget’s rule-based alternatives</span>
-            <Button
-              variant={choice === null ? "secondary" : "ghost"}
-              size="sm"
-              aria-pressed={choice === null}
-              onClick={() => onChoice(null)}
-            >
-              <span>Original</span>
-              <span>{money(proposal.pipeline.budget.total)}</span>
-            </Button>
-            {proposal.alternatives.map((option, index) => (
+        {proposal?.result === "unresolved" && (
+          <div className="constraint-choices">
+            <span>Which constraint would you like to relax?</span>
+            {proposal.pipeline.budget.total > confirmed.budget && (
               <Button
-                key={option.title}
-                variant={choice === index ? "secondary" : "ghost"}
-                aria-pressed={choice === index}
+                variant="outline"
                 size="sm"
-                aria-label={`Preview alternative ${index + 1}: ${option.title}`}
-                onClick={() => onChoice(index)}
+                onClick={() => onBudget(proposal.pipeline.budget.total)}
               >
-                <span>{option.title}</span>
-                <span>{money(option.pipeline.budget.total)}</span>
+                Set limit to {money(proposal.pipeline.budget.total)}
               </Button>
-            ))}
+            )}
+            <Button variant="ghost" size="sm" onClick={onGuests}>
+              Change attendance
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const editor = document.getElementById("review-kept-editor");
+                if (editor instanceof HTMLDetailsElement) {
+                  editor.open = true;
+                  editor.scrollIntoView({ block: "nearest" });
+                }
+              }}
+            >
+              Change kept items
+            </Button>
           </div>
         )}
         <div className="proposal-actions">
           <Button variant="ghost" size="sm" onClick={onDismiss}>
             Dismiss
           </Button>
-          <Button size="sm" disabled={pipeline.budget.overBy > 0} onClick={onApply}>
-            Apply plan
-            <ArrowRight />
-          </Button>
+          {!proposal && !pending ? (
+            <Button size="sm" onClick={onRevise}>
+              {notice ? "Revise with this constraint" : "Retry review"}
+              <ArrowRight />
+            </Button>
+          ) : (
+            <Button size="sm" disabled={!canApply} onClick={onApply}>
+              Apply plan
+              <ArrowRight />
+            </Button>
+          )}
         </div>
       </div>
     </section>

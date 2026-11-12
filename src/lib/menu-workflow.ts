@@ -1,11 +1,21 @@
 import { z } from "zod";
-import { buildProposal, catalog, maxQuantity, validPlan, type Plan } from "./dinner";
+import {
+  buildProposal,
+  catalog,
+  maxQuantity,
+  validPlan,
+  validRecommendationPlan,
+  type Plan,
+  type ReviewAttempt,
+} from "./dinner";
 
 const itemIdSchema = z.enum(["napa", "enoki", "tofu", "beef", "lotus", "noodles", "bok", "broth"]);
 export const reviewRequestSchema = z
   .object({
     plan: z.custom<Plan>(validPlan, "Invalid dinner settings."),
     revision: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+    requestId: z.string().min(1).max(80),
+    userRequest: z.string().trim().min(1).max(240),
   })
   .strict();
 export type ReviewRequest = z.infer<typeof reviewRequestSchema>;
@@ -50,24 +60,27 @@ export const menuJsonSchema = {
   },
 };
 
-export function proposalFromMenu(output: unknown, request: ReviewRequest) {
+export function menuRecommendation(output: unknown, request: ReviewRequest) {
   const result = menuOutputSchema.parse(output);
   if (new Set(result.recommendations.map((row) => row.id)).size !== catalog.length)
     throw new Error("Menu must recommend every catalog item exactly once.");
   const quantities = Object.fromEntries(
     result.recommendations.map((row) => [row.id, row.quantity]),
   ) as Plan["quantities"];
-  return buildProposal(
-    { ...request.plan, quantities },
-    request.plan,
-    request.revision,
-    "live",
-    result.summary,
-  );
+  const plan = { ...request.plan, quantities };
+  if (!validRecommendationPlan(plan)) throw new Error("Invalid catalog quantities.");
+  return { plan, summary: result.summary };
+}
+
+export function proposalFromMenu(output: unknown, request: ReviewRequest) {
+  const result = menuRecommendation(output, request);
+  return buildProposal(result.plan, request.plan, request.revision, "live", result.summary);
 }
 
 export function menuContext(request: ReviewRequest) {
   return {
+    requestId: request.requestId,
+    userRequest: request.userRequest,
     guests: request.plan.guests,
     vegetarianGuests: request.plan.vegetarians,
     budgetUSD: request.plan.budget,
@@ -86,6 +99,16 @@ export type ReviewResult =
   | { ok: true; proposal: ReturnType<typeof proposalFromMenu> }
   | {
       ok: false;
-      code: "configuration" | "invalid" | "timeout" | "rate-limit" | "credits" | "gateway";
+      code:
+        | "configuration"
+        | "invalid"
+        | "timeout"
+        | "rate-limit"
+        | "credits"
+        | "gateway"
+        | "cancelled";
       message: string;
+      requestId?: string;
+      revision?: number;
+      attempts?: ReviewAttempt[];
     };

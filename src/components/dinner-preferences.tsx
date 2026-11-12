@@ -12,8 +12,10 @@ import type { Plan } from "@/lib/dinner";
 export function DinnerPreferences({
   plan,
   onChange,
+  onExample,
 }: {
   plan: Plan;
+  onExample: () => void;
   onChange: (changes: Partial<Pick<Plan, "guests" | "vegetarians" | "budget">>) => void;
 }) {
   return (
@@ -94,8 +96,8 @@ export function DinnerPreferences({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => onChange({ guests: 8, vegetarians: 1 })}>
-            Two more friends, one vegetarian
+          <DropdownMenuItem onSelect={onExample}>
+            Two more friends · same budget · keep beef (review)
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onChange({ vegetarians: plan.guests })}>
             Everyone vegetarian

@@ -98,8 +98,36 @@ export type Pipeline = {
     purchases: Purchase[];
     affected: ItemId[];
     extraPacks: number;
+    implications: PackageImplication[];
   };
   budget: { id: "budget"; source: "shopping"; total: number; overBy: number; drivers: ItemId[] };
+};
+export type PackageImplication = {
+  id: ItemId;
+  planned: number;
+  packs: number;
+  purchased: number;
+  surplus: number;
+  lowerPackThreshold: number;
+  reductionForOneLessPack: number;
+  saving: number;
+};
+export type ConstraintFeedback = {
+  total: number;
+  limit: number;
+  overage: number;
+  violations: string[];
+  packageImplications: PackageImplication[];
+  protectedIngredients: { id: ItemId; minimum: number }[];
+  permittedChanges: { id: ItemId; minimum: number; maximum: number }[];
+};
+export type ReviewAttempt = {
+  number: number;
+  summary: string;
+  pipeline: Pipeline;
+  feedback: ConstraintFeedback;
+  feasible: boolean;
+  changedFromPrevious: ItemId[];
 };
 export type Alternative = { title: string; explanation: string; plan: Plan; pipeline: Pipeline };
 export type PlannerMode = "sample" | "live";
@@ -110,6 +138,10 @@ export type Proposal = {
   alternatives: Alternative[];
   mode: PlannerMode;
   summary: string;
+  requestId: string;
+  userRequest: string;
+  attempts: ReviewAttempt[];
+  result: "feasible" | "unresolved";
 };
 export const initialPlan = (): Plan => ({
   guests: 6,
@@ -208,6 +240,17 @@ export function coordinate(plan: Plan, confirmed: Plan): Pipeline {
           packages(confirmed.quantities[item.id], item),
       )
       .map((item) => item.id),
+    implications: purchases.map((row) => ({
+      id: row.item.id,
+      planned: plan.quantities[row.item.id],
+      packs: row.packs,
+      purchased: row.purchasedQuantity,
+      surplus: row.purchasedQuantity - plan.quantities[row.item.id],
+      lowerPackThreshold: Math.max(0, (row.packs - 1) * row.item.packageSize),
+      reductionForOneLessPack:
+        plan.quantities[row.item.id] - Math.max(0, (row.packs - 1) * row.item.packageSize),
+      saving: row.item.price,
+    })),
     extraPacks:
       purchases.reduce((sum, row) => sum + row.packs, 0) -
       shoppingAssistant(confirmed).reduce((sum, row) => sum + row.packs, 0),
@@ -225,46 +268,177 @@ export function coordinate(plan: Plan, confirmed: Plan): Pipeline {
   };
   return { menu, shopping, budget };
 }
-export function budgetAssistant(
-  plan: Plan,
-  purchases = shoppingAssistant(plan),
-): Omit<Alternative, "pipeline">[] {
-  if (
-    purchases.reduce((sum, row) => sum + row.subtotal, 0) <= plan.budget ||
-    plan.kept.includes("beef") ||
-    plan.quantities.beef === 0 ||
-    plan.quantities.tofu === 0
-  )
-    return [];
-  const options = [
-    {
-      title: "Less beef",
-      explanation: "Use two beef packs and keep the generous tofu and vegetable portions.",
-      quantities: { ...plan.quantities, beef: Math.min(plan.quantities.beef, 600) },
-    },
-    {
-      title: "Simpler vegetables",
-      explanation: "Use three beef packs, two enoki packs, and one lotus root pack.",
-      quantities: {
-        ...plan.quantities,
-        beef: Math.min(plan.quantities.beef, 900),
-        enoki: Math.min(plan.quantities.enoki, 300),
-        lotus: Math.min(plan.quantities.lotus, 300),
-      },
-    },
-  ];
-  return options
-    .filter((option) => plan.kept.every((id) => option.quantities[id] === plan.quantities[id]))
-    .map((option) => ({
-      title: option.title,
-      explanation: option.explanation,
-      plan: { ...plan, quantities: option.quantities },
-    }))
-    .filter(
-      (option) => cost(option.plan) <= plan.budget && proposalError(option.plan, plan) === null,
-    );
+export const exampleRequest =
+  "Two more friends are joining. Keep the same budget and keep the beef.";
+export function friendsExample(): Plan {
+  return { ...preferences(initialPlan(), { guests: 8, vegetarians: 1 }), kept: ["beef"] };
 }
-// A single path builds both sample and live proposals. Shopping and Budget are calculations.
+export function requestDescription(plan: Plan): string {
+  return `Plan hotpot for ${plan.guests} guests, including ${plan.vegetarians} vegetarian, within $${plan.budget}.`;
+}
+export function feedbackFor(
+  proposed: Plan,
+  confirmed: Plan,
+  pipeline = coordinate(proposed, confirmed),
+): ConstraintFeedback {
+  const violations = proposalViolations(proposed, confirmed);
+  return {
+    total: pipeline.budget.total,
+    limit: confirmed.budget,
+    overage: Math.max(0, pipeline.budget.total - confirmed.budget),
+    violations: [
+      ...violations,
+      ...(pipeline.budget.total > confirmed.budget
+        ? [
+            `Purchases exceed the $${confirmed.budget} limit by $${pipeline.budget.total - confirmed.budget}.`,
+          ]
+        : []),
+    ],
+    packageImplications: pipeline.shopping.implications,
+    protectedIngredients: confirmed.kept.map((id) => ({ id, minimum: confirmed.quantities[id] })),
+    permittedChanges: catalog.map((item) => ({
+      id: item.id,
+      minimum: confirmed.kept.includes(item.id)
+        ? confirmed.quantities[item.id]
+        : item.id === "broth" && confirmed.quantities.broth > 0
+          ? 1
+          : 0,
+      maximum:
+        confirmed.quantities[item.id] === 0 ||
+        (!item.vegetarian && confirmed.guests === confirmed.vegetarians)
+          ? 0
+          : maxQuantity(item),
+    })),
+  };
+}
+export function assessAttempt(
+  proposed: Plan,
+  confirmed: Plan,
+  summary: string,
+  previous?: ReviewAttempt,
+): ReviewAttempt {
+  if (!validRecommendationPlan(proposed) || !validPlan(confirmed))
+    throw new Error("Invalid catalog ingredients or quantities.");
+  const pipeline = coordinate(proposed, confirmed);
+  const feedback = feedbackFor(proposed, confirmed, pipeline);
+  return {
+    number: previous ? 2 : 1,
+    summary,
+    pipeline,
+    feedback,
+    feasible: feedback.violations.length === 0,
+    changedFromPrevious: previous
+      ? catalog
+          .filter(
+            (item) =>
+              previous.pipeline.menu.plan.quantities[item.id] !== proposed.quantities[item.id],
+          )
+          .map((item) => item.id)
+      : [],
+  };
+}
+export function finishReview(
+  attempts: ReviewAttempt[],
+  revision: number,
+  mode: PlannerMode,
+  requestId: string,
+  userRequest: string,
+): Proposal {
+  const latest = attempts.at(-1);
+  if (!latest || attempts.length > 2 || (attempts.length === 2 && attempts[0]?.feasible))
+    throw new Error("Invalid bounded review record.");
+  return {
+    revision,
+    requestId,
+    userRequest,
+    mode,
+    plan: latest.pipeline.menu.plan,
+    pipeline: latest.pipeline,
+    alternatives: [],
+    summary: latest.summary,
+    attempts,
+    result: latest.feasible ? "feasible" : "unresolved",
+  };
+}
+// Sample Menu uses the same Shopping/Budget feedback as the live Menu revision.
+// It is a transparent rule-based recommendation, not a simulated model call.
+export function reviseSampleMenu(confirmed: Plan, previous: ReviewAttempt): Plan {
+  const quantities = { ...previous.pipeline.menu.plan.quantities };
+  for (const permission of previous.feedback.permittedChanges)
+    quantities[permission.id] = Math.max(
+      permission.minimum,
+      Math.min(permission.maximum, quantities[permission.id]),
+    );
+  let next: Plan = { ...confirmed, quantities };
+  const solids = catalog.filter((item) => item.unit === "g");
+  const plantTotal = () =>
+    solids
+      .filter((item) => item.vegetarian)
+      .reduce((sum, item) => sum + next.quantities[item.id], 0);
+  const solidTotal = () => solids.reduce((sum, item) => sum + next.quantities[item.id], 0);
+  const fill = Math.max(
+    0,
+    confirmed.guests * 350 - solidTotal(),
+    confirmed.vegetarians * 350 - plantTotal(),
+  );
+  const filler = solids
+    .filter((item) => item.vegetarian && confirmed.quantities[item.id] > 0)
+    .sort((a, b) => a.price / a.packageSize - b.price / b.packageSize)[0];
+  if (fill > 0 && filler)
+    next = {
+      ...next,
+      quantities: {
+        ...next.quantities,
+        [filler.id]: Math.min(maxQuantity(filler), next.quantities[filler.id] + fill),
+      },
+    };
+  // Each iteration must remove a real purchased pack; at most the starting pack count.
+  const bound = shoppingAssistant(next).reduce((sum, row) => sum + row.packs, 0);
+  for (let step = 0; step < bound && cost(next) > confirmed.budget; step++) {
+    const candidates = previous.feedback.permittedChanges
+      .flatMap((permission) => {
+        const item = catalog.find((item) => item.id === permission.id)!;
+        const reduced = Math.max(
+          permission.minimum,
+          (packages(next.quantities[item.id], item) - 1) * item.packageSize,
+        );
+        if (reduced < 0 || reduced >= next.quantities[item.id]) return [];
+        const candidate = { ...next, quantities: { ...next.quantities, [item.id]: reduced } };
+        const saving = cost(next) - cost(candidate);
+        return saving > 0 && proposalError(candidate, confirmed) === null
+          ? [{ candidate, saving }]
+          : [];
+      })
+      .sort((a, b) => b.saving - a.saving);
+    if (!candidates[0]) break;
+    next = candidates[0].candidate;
+  }
+  return next;
+}
+export function review(
+  plan: Plan,
+  revision: number,
+  requestId = `sample-${revision}`,
+  userRequest = requestDescription(plan),
+): Proposal {
+  const first = assessAttempt(
+    menuAssistant(plan),
+    plan,
+    "Sample portion rules scale the selected ingredients for your guests and preserve kept minimums.",
+  );
+  const attempts = [first];
+  if (!first.feasible)
+    attempts.push(
+      assessAttempt(
+        reviseSampleMenu(plan, first),
+        plan,
+        "Sample Menu uses the calculated feedback to reduce whole-pack costs while preserving preferences and kept quantities.",
+        first,
+      ),
+    );
+  return finishReview(attempts, revision, "sample", requestId, userRequest);
+}
+// Kept for structured-output validation callers; the bounded runner uses assessAttempt.
 export function buildProposal(
   proposed: Plan,
   plan: Plan,
@@ -274,24 +448,18 @@ export function buildProposal(
 ): Proposal {
   const error = proposalError(proposed, plan);
   if (error) throw new Error(error);
-  const pipeline = coordinate(proposed, plan);
-  const alternatives = budgetAssistant(proposed, pipeline.shopping.purchases)
-    .filter((option) => proposalError(option.plan, plan) === null)
-    .map((option) => ({ ...option, pipeline: coordinate(option.plan, plan) }));
-  return { revision, plan: proposed, pipeline, alternatives, mode, summary };
-}
-export function review(plan: Plan, revision: number): Proposal {
-  return buildProposal(
-    menuAssistant(plan),
-    plan,
+  return finishReview(
+    [assessAttempt(proposed, plan, summary)],
     revision,
-    "sample",
-    "Sample portions based on your guest settings.",
+    mode,
+    `validation-${revision}`,
+    requestDescription(plan),
   );
 }
 export type PlannerState = {
   plan: Plan;
   revision: number;
+  requestId: string | null;
   proposal: Proposal | null;
   history: Plan[];
   message: string;
@@ -299,6 +467,7 @@ export type PlannerState = {
 export const initialState = (): PlannerState => ({
   plan: initialPlan(),
   revision: 1,
+  requestId: null,
   proposal: null,
   history: [],
   message: "",
@@ -313,6 +482,7 @@ export function updatePlan(state: PlannerState, plan: Plan, message = ""): Plann
   return {
     plan,
     revision: state.revision + 1,
+    requestId: null,
     proposal: null,
     history: [...state.history, state.plan].slice(-30),
     message,
@@ -322,6 +492,8 @@ export function acceptProposal(state: PlannerState, plan: Plan): PlannerState {
   if (
     !state.proposal ||
     state.proposal.revision !== state.revision ||
+    state.proposal.requestId !== state.requestId ||
+    state.proposal.result !== "feasible" ||
     proposalError(plan, state.plan) ||
     cost(plan) > state.plan.budget
   )
@@ -341,6 +513,7 @@ export function undo(state: PlannerState): PlannerState {
     ? {
         plan: previous,
         revision: state.revision + 1,
+        requestId: null,
         proposal: null,
         history: state.history.slice(0, -1),
         message: "Previous dinner plan restored.",
@@ -376,6 +549,17 @@ export function validPlan(value: unknown): value is Plan {
     p.kept.every((id) => p.quantities[id] > 0)
   );
 }
+// A model candidate may violate kept minimums; retain it for feedback, never for Apply.
+export function validRecommendationPlan(value: unknown): value is Plan {
+  if (!value || typeof value !== "object") return false;
+  const plan = value as Plan;
+  return (
+    Array.isArray(plan.kept) &&
+    new Set(plan.kept).size === plan.kept.length &&
+    plan.kept.every((id) => catalog.some((item) => item.id === id)) &&
+    validPlan({ ...plan, kept: [] })
+  );
+}
 export const maxQuantity = (item: Item) => (item.unit === "set" ? 30 : 30000);
 export function samePlan(a: Plan, b: Plan): boolean {
   return (
@@ -387,9 +571,10 @@ export function samePlan(a: Plan, b: Plan): boolean {
     catalog.every((item) => a.quantities[item.id] === b.quantities[item.id])
   );
 }
-export function proposalError(proposed: Plan, confirmed: Plan): string | null {
-  if (!validPlan(proposed) || !validPlan(confirmed))
-    return "The recommendation contains invalid ingredients or quantities.";
+export function proposalViolations(proposed: Plan, confirmed: Plan): string[] {
+  if (!validRecommendationPlan(proposed) || !validPlan(confirmed))
+    return ["The recommendation contains invalid ingredients or quantities."];
+  const violations: string[] = [];
   if (
     proposed.guests !== confirmed.guests ||
     proposed.vegetarians !== confirmed.vegetarians ||
@@ -397,18 +582,19 @@ export function proposalError(proposed: Plan, confirmed: Plan): string | null {
     proposed.kept.length !== confirmed.kept.length ||
     proposed.kept.some((id) => !confirmed.kept.includes(id))
   )
-    return "A recommendation cannot change your preferences, budget or kept items.";
+    violations.push("A recommendation cannot change your preferences, budget or kept items.");
   if (confirmed.kept.some((id) => proposed.quantities[id] < confirmed.quantities[id]))
-    return "A recommendation cannot reduce a kept quantity. Unlock that item to change it.";
+    violations.push(
+      "A recommendation cannot reduce a kept quantity. Unlock that item to change it.",
+    );
   if (
     catalog.some(
       (item) => confirmed.quantities[item.id] === 0 && proposed.quantities[item.id] !== 0,
     )
   )
-    return "A recommendation cannot restore an ingredient you removed.";
+    violations.push("A recommendation cannot restore an ingredient you removed.");
   if (proposed.vegetarians === proposed.guests && proposed.quantities.beef > 0)
-    return "All guests are vegetarian. Unlock and remove beef, then review again.";
-  // Prototype serving guardrails, shared with the model prompt and all budget alternatives.
+    violations.push("All guests are vegetarian. Unlock and remove beef, then review again.");
   const solids = catalog.filter((item) => item.unit === "g");
   if (
     solids.reduce((sum, item) => sum + proposed.quantities[item.id], 0) < proposed.guests * 350 ||
@@ -417,8 +603,13 @@ export function proposalError(proposed: Plan, confirmed: Plan): string | null {
       .reduce((sum, item) => sum + proposed.quantities[item.id], 0) <
       proposed.vegetarians * 350
   )
-    return "The recommendation has too little food for this group. Restore ingredients or request another review.";
+    violations.push(
+      "The recommendation has too little food for this group. Restore ingredients or request another review.",
+    );
   if (confirmed.quantities.broth > 0 && proposed.quantities.broth === 0)
-    return "The recommendation must keep your selected broth.";
-  return null;
+    violations.push("The recommendation must keep your selected broth.");
+  return violations;
+}
+export function proposalError(proposed: Plan, confirmed: Plan): string | null {
+  return proposalViolations(proposed, confirmed)[0] ?? null;
 }

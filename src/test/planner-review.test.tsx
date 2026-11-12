@@ -100,7 +100,10 @@ describe("review lifecycle", () => {
     await act(async () => {
       resolvers[1]!({
         ok: true,
-        proposal: { ...review(second.plan, second.revision), mode: "live" },
+        proposal: {
+          ...review(second.plan, second.revision, liveReview.mock.calls[1]![0].data.requestId),
+          mode: "live",
+        },
       });
       await secondPending;
     });
@@ -108,11 +111,49 @@ describe("review lifecycle", () => {
     await act(async () => {
       resolvers[0]!({
         ok: true,
-        proposal: { ...review(first.plan, first.revision), mode: "live" },
+        proposal: {
+          ...review(first.plan, first.revision, liveReview.mock.calls[0]![0].data.requestId),
+          mode: "live",
+        },
       });
       await firstPending;
     });
     expect(result.current.state.proposal?.revision).toBe(second.revision);
     expect(result.current.state.plan).toEqual(second.plan);
+  });
+  it("keeps quantities confirmed while a new kept constraint invalidates review, then reruns with a new identity", async () => {
+    const { result } = renderHook(usePlanner);
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+    await act(() => result.current.startExample());
+    const first = result.current.state.proposal!;
+    const quantities = { ...result.current.state.plan.quantities };
+    expect(first.plan.quantities.beef).toBeGreaterThanOrEqual(900);
+    act(() => result.current.setKept("enoki", true));
+    expect(result.current.state.proposal).toBeNull();
+    expect(result.current.reviewOpen).toBe(true);
+    expect(result.current.state.plan.quantities).toEqual(quantities);
+    expect(result.current.reviewNotice).toMatch(/invalid/);
+    await act(() => result.current.requestReview());
+    const revised = result.current.state.proposal!;
+    expect(revised.requestId).not.toBe(first.requestId);
+    expect(revised.revision).toBe(first.revision + 1);
+    expect(revised.plan.quantities.enoki).toBeGreaterThanOrEqual(quantities.enoki);
+    expect(result.current.state.plan.quantities).toEqual(quantities);
+    act(() => result.current.dismissReview());
+    expect(result.current.reviewOpen).toBe(false);
+    expect(result.current.state.proposal).toBeNull();
+    expect(result.current.state.plan.quantities).toEqual(quantities);
+  });
+  it("ignores a response with a mismatched request ID even at the same plan revision", async () => {
+    const { result } = renderHook(usePlanner);
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+    act(() => result.current.setMode("live"));
+    liveReview.mockImplementation(async ({ data }) => ({
+      ok: true,
+      proposal: { ...review(data.plan, data.revision, "wrong-request"), mode: "live" },
+    }));
+    await act(() => result.current.requestReview());
+    expect(result.current.state.proposal).toBeNull();
+    expect(result.current.error).toMatch(/no longer matches/);
   });
 });

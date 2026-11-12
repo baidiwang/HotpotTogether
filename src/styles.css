@@ -1282,7 +1282,21 @@ button:not(:focus-visible) {
   }
 }
 
-/* Keep review and the shared plan in one desktop workspace. */
+.review-preparation-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  font-size: 10px;
+}
+.review-preparation-note svg {
+  width: 11px;
+  height: 11px;
+}
+.workspace.has-proposal .pot-anchor > .preparation-note {
+  display: none;
+}
+/* Review shares the workspace; only its detail region scrolls. */
 .review-controls {
   display: flex;
   align-items: center;
@@ -1297,101 +1311,176 @@ button:not(:focus-visible) {
   width: 13px;
   height: 13px;
 }
-.review-feedback:empty {
-  display: none;
-}
-.review-feedback {
-  font-size: 12px;
-  line-height: 1.6;
-  margin: 8px 0;
-}
-.review-feedback p {
-  margin: 0;
-}
-.review-error {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  color: var(--primary);
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
-}
 .joint-proposal {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
-}
-.proposal-content {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.contribution-list {
-  flex: none;
-}
-.proposal-decision {
   background: var(--background);
 }
-.proposal-content .contribution {
-  padding: 6px 0;
-}
-.contribution-calculations {
-  flex: 0 1 auto;
-  min-height: 64px;
-  max-height: 128px;
-  border-top: 1px solid var(--border);
-  padding-top: 8px;
+.joint-proposal .proposal-content {
+  min-height: 0;
+  display: block;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: 4px;
+}
+.proposal-header .approval-status {
+  margin: 6px 0 10px;
+  font-size: 11px;
+}
+.review-source {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.current-request {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+.review-kept {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 0 0 8px;
+  color: var(--muted-foreground);
+}
+.review-kept svg {
+  flex: none;
+  align-self: center;
+}
+.joint-proposal .contribution {
+  padding: 8px 0;
+}
+.contribution strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.contribution strong small {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+.joint-proposal .contribution > span {
+  gap: 3px;
+}
+.joint-proposal .contribution > span > span {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.joint-proposal .contribution-calculations {
+  max-height: 136px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 8px 0 8px 24px;
+  border-top: 1px solid var(--border);
 }
 .contribution-calculations p {
   font-size: 11px;
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
+.revision-explanation {
+  font-size: 11px;
   line-height: 1.6;
-  margin: 0 0 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
 }
-.proposal-decision .decision-cost {
-  padding: 12px 0 8px;
+.revision-explanation p {
+  margin: 0;
 }
-.cost-change {
+.keep-editor,
+.attempt-history {
   font-size: 11px;
-  color: var(--muted-foreground);
-  margin: 0 0 10px;
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+  padding: 8px 0;
 }
-.proposal-decision .alternative-options {
+.keep-editor summary,
+.attempt-history summary {
+  cursor: pointer;
+  color: var(--foreground);
+}
+.keep-editor > div {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding-top: 8px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
 }
-.alternative-options > span {
-  grid-column: 1/-1;
-}
-.alternative-options button {
-  flex-direction: column;
-  gap: 2px;
-  text-align: center;
-  font-size: 11px;
-}
-.alternative-options button span:first-child {
-  min-height: 24px;
+.keep-editor label {
   display: flex;
   align-items: center;
+  gap: 6px;
+  min-height: 28px;
 }
-.alternative-options button {
-  white-space: normal;
-  height: auto;
-  min-height: 30px;
-  text-align: left;
-  padding: 5px 8px;
+.keep-editor input {
+  accent-color: var(--primary);
+  width: 14px;
+  height: 14px;
+}
+.attempt-record {
+  padding-top: 6px;
+}
+.attempt-record p {
+  margin: 5px 0;
+}
+.feedback-packages {
+  padding-left: 10px;
+  color: var(--muted-foreground);
+}
+.proposal-decision {
+  background: var(--background);
+  border-top: 1px solid var(--border);
+}
+.proposal-decision .decision-cost {
+  border-top: 0;
+  padding: 10px 0 5px;
+}
+.review-result {
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+.review-result.is-feasible {
+  color: var(--success);
+}
+.review-result.is-conflict {
+  color: var(--primary);
+  max-height: 54px;
+  overflow: auto;
 }
 .proposal-actions {
-  margin-top: 12px;
+  margin: 8px 0 0;
 }
-@media (min-width: 960px) {
+.constraint-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.constraint-choices > span {
+  width: 100%;
+  color: var(--muted-foreground);
+}
+.constraint-choices button {
+  height: auto;
+  min-height: 28px;
+  padding: 4px 6px;
+  font-size: 11px;
+}
+.shared-plan {
+  container-type: inline-size;
+}
+@media (min-width: 1024px) {
   .workspace.has-proposal {
-    grid-template-columns: minmax(0, 1fr) 352px;
+    grid-template-columns: minmax(0, 1fr) 344px;
     gap: 24px;
   }
   .workspace.has-proposal .shared-plan {
@@ -1405,98 +1494,133 @@ button:not(:focus-visible) {
     top: 16px;
     width: 100%;
     max-width: none;
-    margin: 18px 0 0;
+    max-height: calc(100dvh - 220px);
+    margin: 0;
     border-top: 0;
     border-left: 1px solid var(--border);
-    padding: 14px 0 14px 22px;
-    max-height: min(630px, calc(100dvh - 240px));
+    padding: 12px 0 12px 20px;
   }
   .workspace.has-proposal .table-board {
-    height: 550px;
+    height: clamp(400px, calc(100dvh - 290px), 550px);
+  }
+  .workspace.has-proposal .food-slot {
+    width: clamp(126px, 23cqw, 164px);
+    height: 156px;
+  }
+  .workspace.has-proposal .ingredient-button {
+    height: 138px;
+  }
+  .workspace.has-proposal .food-art {
+    width: clamp(100px, 21cqw, 144px);
+    height: 96px;
   }
   .workspace.has-proposal .slot-napa,
   .workspace.has-proposal .slot-enoki {
-    top: 15%;
+    top: 13%;
+  }
+  .workspace.has-proposal .slot-noodles,
+  .workspace.has-proposal .slot-lotus {
+    top: 72%;
+  }
+  .workspace.has-proposal .slot-bok {
+    top: 83%;
+  }
+  .workspace.has-proposal .pot-anchor {
+    top: 46%;
+    width: clamp(200px, 36cqw, 270px);
+  }
+  .workspace.has-proposal .pot-illustration,
+  .workspace.has-proposal .pot-illustration .food-art {
+    width: clamp(200px, 36cqw, 270px);
+    height: 190px;
+  }
+  .workspace.has-proposal .broth-control .shopping-item {
+    height: auto;
   }
   .view-proposal {
     display: none;
   }
+  .workspace.has-proposal .shopping-head,
+  .workspace.has-proposal .shopping-row {
+    grid-template-columns: minmax(0, 1fr) 72px 124px 56px;
+    gap: 8px;
+  }
 }
-@media (min-width: 960px) and (max-width: 1200px) {
+@media (min-width: 1024px) and (max-width: 1150px) {
+  .app-shell {
+    padding: 0 24px;
+  }
   .workspace.has-proposal {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) 328px;
+    gap: 16px;
   }
-  .workspace.has-proposal .food-slot {
-    width: 142px;
-  }
-  .workspace.has-proposal .food-art {
-    width: 122px;
-  }
-  .workspace.has-proposal .pot-anchor,
-  .workspace.has-proposal .pot-illustration,
-  .workspace.has-proposal .pot-illustration .food-art {
-    width: 210px;
-  }
-  .workspace.has-proposal .pot-illustration,
-  .workspace.has-proposal .pot-illustration .food-art {
-    height: 166px;
+  .workspace.has-proposal .joint-proposal {
+    padding-left: 16px;
   }
   .workspace.has-proposal .shopping-head,
   .workspace.has-proposal .shopping-row {
-    grid-template-columns: minmax(0, 1fr) 68px 112px 50px;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) 60px 104px 44px;
+    gap: 6px;
   }
 }
-@media (max-width: 959px) {
+@media (max-width: 1023px) {
   .workspace.has-proposal {
-    grid-template-columns: minmax(0, 1fr);
+    display: block;
+    padding-bottom: min(55dvh, 500px);
   }
-  .joint-proposal {
-    max-height: none;
+  .workspace.has-proposal .joint-proposal {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 30;
+    width: 100%;
+    max-width: none;
+    max-height: 55dvh;
+    margin: 0;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    padding: 12px 20px 14px;
+    background: var(--background);
   }
-  .proposal-content {
-    overflow: visible;
+  .joint-proposal .proposal-content {
+    overflow-y: auto;
   }
-  .contribution-calculations {
-    flex: none;
-  }
-  .planning-line {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .review-controls {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .review-error {
-    align-items: flex-start;
-    flex-wrap: wrap;
+  .joint-proposal .proposal-actions {
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .view-proposal {
     display: inline-flex;
   }
+  .planning-line,
+  .review-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .workspace.has-proposal .proposal-heading h2 {
+    font-size: 17px;
+  }
+  .workspace.has-proposal .contribution {
+    padding: 6px 0;
+  }
+  .workspace.has-proposal .current-request {
+    font-size: 11px;
+  }
+  .workspace.has-proposal .shopping-list {
+    margin-bottom: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .joint-proposal {
+    scroll-behavior: auto;
+  }
 }
 
-.joint-proposal .approval-status {
-  margin-bottom: 8px;
-}
-.joint-proposal .conflict-note {
-  margin-bottom: 8px;
-}
-.proposal-content .contribution > span {
-  gap: 2px;
-}
-.proposal-content .contribution > span > span {
+.attempt-quantities > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
   font-size: 11px;
-  line-height: 1.5;
 }
-@media (max-height: 740px) and (min-width: 960px) {
-  .proposal-content {
-    overflow-y: auto;
-    display: block;
-  }
-  .contribution-calculations {
-    min-height: 64px;
-  }
+.attempt-quantities > div > span:last-child {
+  white-space: nowrap;
 }

@@ -12,7 +12,12 @@ import {
 import { menuContext, proposalFromMenu } from "@/lib/menu-workflow";
 import { generateMenuReview } from "@/lib/menu.server";
 
-const request = () => ({ plan: initialPlan(), revision: 7 });
+const request = () => ({
+  plan: initialPlan(),
+  revision: 7,
+  requestId: "test-request-7",
+  userRequest: "Review the current dinner plan.",
+});
 const output = () => ({
   summary: "Balanced catalog portions for six guests.",
   recommendations: catalog.map((item) => ({
@@ -100,7 +105,8 @@ describe("structured Menu pipeline", () => {
   });
   it("cannot accept arbitrary quantities, changed preferences or budget inflation", () => {
     const original = initialState();
-    const state = { ...original, proposal: review(original.plan, original.revision) };
+    const run = review(original.plan, original.revision);
+    const state = { ...original, requestId: run.requestId, proposal: run };
     for (const plan of [
       preferences(state.plan, { budget: 200 }),
       preferences(state.plan, { guests: 7 }),
@@ -197,5 +203,99 @@ describe("server-side Lovable gateway", () => {
     const result = await generateMenuReview(request(), { ...credentials, fetcher, timeoutMs: 5 });
     expect(result).toMatchObject({ ok: false, code: "timeout" });
     expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("bounded live feedback loop (mocked gateway)", () => {
+  const expanded = {
+    napa: 1100,
+    enoki: 500,
+    tofu: 900,
+    beef: 1050,
+    lotus: 500,
+    noodles: 700,
+    bok: 500,
+    broth: 1,
+  };
+  const rows = (quantities: typeof expanded) => ({
+    summary: "Catalog quantities for eight, preserving the kept beef.",
+    recommendations: catalog.map((item) => ({ id: item.id, quantity: quantities[item.id] })),
+  });
+  const response = (quantities: typeof expanded) =>
+    new Response(
+      JSON.stringify({
+        choices: [
+          { finish_reason: "stop", message: { content: JSON.stringify(rows(quantities)) } },
+        ],
+      }),
+    );
+  it("sends exact calculated feedback to the second model call and stops on a valid revision", async () => {
+    const input = {
+      ...request(),
+      plan: { ...initialPlan(), guests: 8, vegetarians: 1, kept: ["beef" as const] },
+    };
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(response(expanded))
+      .mockResolvedValueOnce(response({ ...expanded, beef: 900, enoki: 300 }));
+    const result = await generateMenuReview(input, { ...credentials, fetcher });
+    expect(result.ok).toBe(true);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    const context = JSON.parse(
+      JSON.parse(String(fetcher.mock.calls[1]![1]?.body)).messages[1].content,
+    );
+    expect(context.feedback).toMatchObject({
+      total: 146,
+      limit: 120,
+      overage: 26,
+      protectedIngredients: [{ id: "beef", minimum: 900 }],
+    });
+    expect(context.previousRecommendation).toEqual(expanded);
+    expect(context.attempt).toBe(2);
+    if (result.ok) {
+      expect(result.proposal.result).toBe("feasible");
+      expect(result.proposal.pipeline.budget.total).toBe(120);
+      expect(result.proposal.requestId).toBe(input.requestId);
+      expect(result.proposal.attempts).toHaveLength(2);
+    }
+  });
+  it("does not call a model again after a feasible first recommendation", async () => {
+    const fetcher = gateway();
+    const result = await generateMenuReview(request(), { ...credentials, fetcher });
+    expect(result.ok).toBe(true);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+  it("never runs a third attempt and never accepts a kept-item violation", async () => {
+    const input = {
+      ...request(),
+      plan: { ...initialPlan(), guests: 8, vegetarians: 1, budget: 50, kept: ["beef" as const] },
+    };
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockImplementation(async () => response({ ...expanded, beef: 0 }));
+    const result = await generateMenuReview(input, { ...credentials, fetcher });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.proposal.result).toBe("unresolved");
+      expect(result.proposal.attempts[1]?.feedback.violations.join(" ")).toMatch(/kept/);
+    }
+  });
+  it("retains the completed initial attempt when the revision errors, without sample fallback", async () => {
+    const input = {
+      ...request(),
+      plan: { ...initialPlan(), guests: 8, vegetarians: 1, kept: ["beef" as const] },
+    };
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(response(expanded))
+      .mockResolvedValueOnce(new Response("unavailable", { status: 503 }));
+    const result = await generateMenuReview(input, { ...credentials, fetcher });
+    expect(result).toMatchObject({ ok: false, code: "gateway" });
+    if (!result.ok) {
+      expect(result.attempts).toHaveLength(1);
+      expect(result.message).toMatch(/Revision failed/);
+    }
+    expect(result).not.toHaveProperty("proposal");
   });
 });
