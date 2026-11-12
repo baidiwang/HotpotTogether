@@ -324,7 +324,7 @@ function Index() {
         <div className="review-controls">
           <span className="quiet-status">
             {pending
-              ? "Menu is preparing recommendations…"
+              ? "Menu review in progress…"
               : proposal
                 ? proposal.result === "feasible"
                   ? "Awaiting your approval"

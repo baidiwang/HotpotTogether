@@ -96,8 +96,15 @@ export function DinnerPreferences({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={onExample}>
-            Two more friends · same budget · keep beef (review)
+          <DropdownMenuItem
+            onSelect={onExample}
+            className="example-option"
+            aria-label="Two more friends · start review"
+          >
+            <span>
+              Two more friends · start review
+              <small>6 → 8 guests · 1 vegetarian · $120 · beef ≥ 900 g</small>
+            </span>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onChange({ vegetarians: plan.guests })}>
             Everyone vegetarian

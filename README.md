@@ -161,7 +161,8 @@ configure hosting access/usage limits for a credential-enabled public demo.
 
 ### Bounded collaboration and shared review
 
-The example **Two more friends · same budget · keep beef (review)** starts from
+The example **Two more friends · start review** shows its starting conditions
+in the menu (6 → 8 guests, one vegetarian, $120, beef ≥ 900 g). It starts from
 `initialPlan()` (six people, $120 and the original quantities), changes attendance
 to eight with one vegetarian, keeps at least 900 g beef, and starts review. It
 never applies a recommendation. Undo history retains the previous complete plan.
@@ -253,6 +254,87 @@ Apply/Undo flow remain unverified until publication. Local Live AI also remains
 unconfigured because no project credential was exported to this machine.
 
 ### Verification
+
+#### Manual entry and three-condition live search
+
+Starting from `4ad4a5d`, the actual browser path was verified at
+`https://preview--hotpot-table-together.lovable.app/` (authorization query values
+are deliberately omitted). Reset does not change the selected planning mode.
+For real calls choose **Planning mode → Live AI mode · Menu recommendations**,
+then **Reset → Beef rolls → Keep → Hotpot for 6 → Guests 8 → 0 vegetarian →
+Increase vegetarians → close the editor → Review changes → Apply plan → Undo**.
+Keep the displayed $120 budget unchanged. The input popovers can be closed by
+clicking their own trigger again. The accessible names are `Edit Beef rolls`,
+`Edit guests` and `Edit vegetarian guests`; the visible guest/preference labels
+show their current values. The shortcut **Try an example → Two more friends ·
+start review** prepares that same six-person baseline and starts review in the
+selected mode. It does not Apply or promise a particular Live result.
+
+**Review changes** starts a new bounded request using current settings.
+**Review plan** starts it when settings match the reviewed snapshot.
+**View proposal**, shown in narrow layouts, only focuses the existing proposal;
+it does not send a new request. The top Menu, Shopping and Budget controls select
+portion, whole-pack and cost views/highlights of the same plan. They do not start
+three separate conversations or model calls. **Plan overview** returns to the
+neutral table. Pending copy describes the complete bounded review without
+claiming an unobserved internal stage; the completed record identifies actual
+feedback and revision when they occur.
+
+Keep protects the catalog identity and a quantity **minimum equal to the current
+confirmed quantity at review time**, not an exact fixed amount. A recommendation
+may increase it; it may not reduce, remove or substitute it. A user can still
+manually edit the confirmed quantity; that invalidates review and changes the
+minimum used by the next request. Applying a larger kept quantity also makes it
+the confirmed minimum for subsequent runs.
+
+This follow-up made exactly **three live requests**, all with the original
+server prompt, model integration and deterministic calculations:
+
+| Group | Conditions after increasing attendance | Initial result | Revision |
+| --- | --- | --- | --- |
+| 1 | 8 guests, 1 vegetarian, $120, beef ≥900 g | 14 packs, $99 | None; first pass valid |
+| 2 | 12 guests, 1 vegetarian, $100, beef ≥900 g | 14 packs, $98 | None; first pass valid |
+| 3 | 16 guests, 2 vegetarians, $120, beef ≥1,200 g | 17 packs, $120 | None; first pass valid |
+
+For group 2 the budget was set to $100 while attendance was six, then left
+unchanged when increasing it to twelve. For group 3 beef was manually set to
+1,200 g before Keep and increasing attendance; its confirmed purchases cost $115.
+All groups were feasible; no initial model error was forced. **No successful
+over-budget → revised-within-budget live case was found within the three-group
+limit.** There were no second Menu calls and no Budget feedback payloads sent in
+these runs. Testing stopped rather than spending further calls. The earlier
+unresolved real revision is a separate result and is not success evidence.
+
+Actual model quantities (grams except the broth set):
+
+| Ingredient | Group 1 | Group 2 | Group 3 |
+| --- | ---: | ---: | ---: |
+| Napa cabbage | 1,000 | 1,500 | 2,500 |
+| Enoki mushrooms | 300 | 150 | 0 |
+| Silken tofu | 600 | 600 | 900 |
+| Beef rolls | 900 | 900 | 1,200 |
+| Lotus root | 300 | 300 | 0 |
+| Rice noodles | 500 | 500 | 500 |
+| Bok choy | 300 | 300 | 600 |
+| Two-way broth | 1 | 1 | 1 |
+
+Confirmed quantities remained unchanged before acceptance. Group 1 Apply changed
+Napa 800 → 1,000 g at the same $99 purchase total; Undo restored 800 g. Group 3
+Apply changed the confirmed total $115 → $120 and kept beef at 1,200 g; Undo
+restored $115 and all earlier quantities. The manual Sample path separately
+produced $146 → $120 through its labeled deterministic revision, Apply and Undo.
+
+At `http://127.0.0.1:8081/`, a real browser request in Live mode still returned
+**Live Menu is not configured**, stayed in Live mode, left confirmed $99 intact
+and did not produce a sample proposal. Lovable's configured preview success is
+not local Live success. Sample works locally. Public production remains outside
+this verification; no Publish action was taken.
+
+Real group 3 proposal screenshots and layout measurements were captured at
+1440×900 and 1280×800, device pixel ratio 1 and visual viewport scale 1. Both
+showed the canvas, first-pass status, confirmed/proposed cost and Apply/Dismiss
+together, with a 344 px panel. A necessary narrow-layout fix adds decision-footer
+clearance so Lovable's fixed preview badge cannot intercept Apply.
 
 The bounded workflow and shared review workspace were committed as `d6b48cf`
 and synced to Lovable preview. The new live eight-person / one-vegetarian example

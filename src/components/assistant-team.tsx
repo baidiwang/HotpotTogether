@@ -57,7 +57,7 @@ export function AssistantTeam({
                 {pending
                   ? id === "menu"
                     ? "Reviewing…"
-                    : "Awaiting Menu"
+                    : "Checks each attempt"
                   : proposal
                     ? proposal.result === "feasible"
                       ? "Review complete"
@@ -272,8 +272,10 @@ export function JointProposal({
                       ? contributionText(id, pipeline, confirmed)
                       : pending
                         ? id === "menu"
-                          ? "Requesting recommendations; one feedback revision if needed."
-                          : "Waiting for Menu’s quantities."
+                          ? "Menu review running; one feedback revision if checks fail."
+                          : id === "shopping"
+                            ? "Whole-pack rounding follows each Menu attempt."
+                            : "Each attempt is checked; constraint feedback returns to Menu if needed."
                         : error
                           ? "No validated result from this request."
                           : "Constraints changed; review again."}
@@ -355,7 +357,7 @@ export function JointProposal({
               </p>
             ) : (
               <p>
-                <strong>Menu revised once.</strong>{" "}
+                <strong>Menu received constraint feedback and revised once.</strong>{" "}
                 {previous && previous.feedback.overage > 0
                   ? `${money(previous.feedback.overage)} over budget → ${money(latest.feedback.overage)} over.`
                   : "Constraint feedback was checked again."}{" "}

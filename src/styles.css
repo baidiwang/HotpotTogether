@@ -1624,3 +1624,19 @@ button:not(:focus-visible) {
 .attempt-quantities > div > span:last-child {
   white-space: nowrap;
 }
+
+.example-option small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+  white-space: normal;
+}
+
+@media (max-width: 1023px) {
+  .joint-proposal .proposal-actions {
+    /* Leave room above fixed preview branding and system insets. */
+    padding-bottom: max(36px, env(safe-area-inset-bottom));
+  }
+}
