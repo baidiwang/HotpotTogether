@@ -1,4 +1,7 @@
 # Hotpot Together
+- [x] Distinct Menu, Shopping and Budget table views with item explanations and neutral overview.
+- [x] Compact visible proposal, draft settings clarity, sans-serif typography and tactile food assets.
+- [x] Verify expanded and all-vegetarian scenarios, constraints, approvals and responsive layouts.
 - [x] Editable dinner sentence, visible assistant team, compact editors and side-by-side joint proposal.
 - [x] Trace Menu → Shopping → Budget dependencies and distinguish portions from purchases.
 - [x] Verify highlights, complete proposal flow, constraints, persistence and responsive composition.
