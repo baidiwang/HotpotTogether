@@ -1,6 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import { initialPlan, initialState, preferences, review, cost, packages, catalog, acceptProposal, updatePlan, undo, shoppingAssistant } from '@/lib/dinner';
 describe('shared dinner rules', () => {
+  it('all-vegetarian review removes beef from portions, purchases and cost while keeping it restorable',()=>{
+    const draft=preferences(initialPlan(),{vegetarians:6});
+    const proposal=review(draft,1);
+    expect(proposal.plan.quantities.beef).toBe(0);
+    expect(proposal.pipeline.shopping.affected).toContain('beef');
+    expect(proposal.pipeline.shopping.purchases.some(row=>row.item.id==='beef')).toBe(false);
+    expect(proposal.pipeline.shopping.extraPacks).toBe(5);
+    expect(proposal.pipeline.budget.total).toBe(90);
+    const state={...initialState(),plan:draft,proposal};
+    const applied=acceptProposal(state,proposal.plan);
+    expect(applied.plan.quantities.beef).toBe(0);
+    expect(undo(applied).plan).toEqual(draft);
+    expect(catalog.find(item=>item.id==='beef')?.base).toBe(900);
+  });
+  it('all-vegetarian review cannot remove kept beef',()=>{
+    const proposal=review({...preferences(initialPlan(),{vegetarians:6}),kept:['beef']},1);
+    expect(proposal.plan.quantities.beef).toBe(900);
+  });
   it('broth removal removes its $8 cost and restoring it returns the same complete plan', () => {
     const original = initialState();
     const removed = updatePlan(original, {...original.plan, quantities: {...original.plan.quantities, broth: 0}});

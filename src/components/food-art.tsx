@@ -1,9 +1,20 @@
 import { useId } from 'react';
 import type { ItemId } from '@/lib/dinner';
+import napa from '@/assets/food-napa.png';
+import enoki from '@/assets/food-enoki.png';
+import tofu from '@/assets/food-tofu.png';
+import beef from '@/assets/food-beef.png';
+import lotus from '@/assets/food-lotus.png';
+import noodles from '@/assets/food-noodles.png';
+import bok from '@/assets/food-bok.png';
+import pot from '@/assets/food-pot.png';
+import broth from '@/assets/food-broth.png';
+const cutouts={napa,enoki,tofu,beef,lotus,noodles,bok,pot,broth};
 
 export function FoodArt({ kind, empty = false }: { kind: ItemId | 'pot'; empty?: boolean }) {
   const id = useId().replace(/:/g, '');
   const fill = `url(#${id})`;
+  if(!empty)return <img src={cutouts[kind]} className={`food-art food-${kind}`} width={200} height={150} alt="" aria-hidden="true" decoding="async"/>;
   return <svg className={`food-art food-${kind} ${empty ? 'food-empty' : ''}`} viewBox="0 0 200 150" aria-hidden="true">
     <defs>
       <linearGradient id={id} x1="0" y1="0" x2="0.8" y2="1"><stop offset="0" className="food-light"/><stop offset="0.55" className="food-mid"/><stop offset="1" className="food-dark"/></linearGradient>

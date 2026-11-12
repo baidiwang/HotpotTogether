@@ -32,6 +32,7 @@ use the editor.
 ## Application architecture
 - Keep dinner calculations and replaceable sample assistant functions in a browser-safe domain module so both views and proposals use identical rules.
 - Store confirmed plan, separate revision-bound proposal, and complete undo history in one planner controller; apply proposals atomically and persist only sample state locally as requested for this prototype.
-- Define food illustration palettes and all presentation tokens in the global stylesheet; reusable SVG ingredients inherit those tokens.
+- Keep presentation tokens in the global stylesheet; use coherent bundled food cutouts inside stable clickable wrappers and retain the SVG fallback for an empty pot.
+- Render assistant-specific portion, package and cost readouts from the shared catalog and proposal pipeline, never independently stored display numbers.
 - Derive the central pot's filled state and preparation notes from confirmed broth quantities; use ingredient popovers in both views and a persisted reviewed-plan snapshot for the toolbar's review status.
 - Each coordinated proposal records Menu output, Shopping's derived purchase rows, and Budget's purchase-based totals; alternatives rerun the same dependency chain so copy and highlights derive from calculations.
