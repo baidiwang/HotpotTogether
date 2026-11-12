@@ -1,56 +1,597 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
-import { ArrowRight, ChevronDown, Info, Leaf, List, LockKeyhole, Plus, RotateCcw, Soup, Undo2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { FoodArt } from '@/components/food-art';
-import { IngredientReadout, IngredientExplanation } from '@/components/ingredient-readout';
-import { IngredientControl } from '@/components/ingredient-control';
-import { DinnerPreferences } from '@/components/dinner-preferences';
-import { assistants, AssistantTeam, JointProposal, money, type Assistant } from '@/components/assistant-team';
-import { usePlanner } from '@/hooks/use-planner';
-import { acceptProposal, catalog, coordinate, cost, initialPlan, initialState, packages, preferences, quantityLabel, review, shoppingAssistant, undo, updatePlan, type Item, type ItemId, type Plan } from '@/lib/dinner';
-export const Route = createFileRoute('/')({head:()=>({meta:[{title:'Hotpot Together — One shared dinner plan'},{name:'description',content:'Menu, Shopping, and Budget coordinate a shared hotpot plan with accurate sample purchase estimates.'},{property:'og:title',content:'Hotpot Together — One shared dinner plan'},{property:'og:description',content:'A shared dinner table, with portions, purchases, and budget considered together.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Index});
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import {
+  ArrowRight,
+  ChevronDown,
+  Info,
+  Leaf,
+  List,
+  LockKeyhole,
+  Plus,
+  RotateCcw,
+  Soup,
+  Undo2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FoodArt } from "@/components/food-art";
+import { IngredientReadout, IngredientExplanation } from "@/components/ingredient-readout";
+import { IngredientControl } from "@/components/ingredient-control";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DinnerPreferences } from "@/components/dinner-preferences";
+import {
+  assistants,
+  AssistantTeam,
+  JointProposal,
+  money,
+  type Assistant,
+} from "@/components/assistant-team";
+import { usePlanner } from "@/hooks/use-planner";
+import {
+  acceptProposal,
+  catalog,
+  coordinate,
+  cost,
+  initialPlan,
+  initialState,
+  packages,
+  preferences,
+  quantityLabel,
+  shoppingAssistant,
+  undo,
+  updatePlan,
+  type Item,
+  type ItemId,
+  type Plan,
+} from "@/lib/dinner";
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Hotpot Together — One shared dinner plan" },
+      {
+        name: "description",
+        content:
+          "Menu, Shopping, and Budget coordinate a shared hotpot plan with accurate sample purchase estimates.",
+      },
+      { property: "og:title", content: "Hotpot Together — One shared dinner plan" },
+      {
+        property: "og:description",
+        content: "A shared dinner table, with portions, purchases, and budget considered together.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Index,
+});
 function Index() {
-  const {state,setState,storageWarning,reviewedPlan,setReviewedPlan}=usePlanner();
-  const {plan,proposal}=state;
-  const [view,setView]=useState<'table'|'shopping'>('table');
-  const [selected,setSelected]=useState<ItemId|null>(null);
-  const [active,setActive]=useState<Assistant|null>(null);
-  const [choice,setChoice]=useState<number|null>(null);
-  const [applied,setApplied]=useState(false);
-  const preview=proposal?(choice===null?proposal.plan:proposal.alternatives[choice]?.plan??proposal.plan):null;
-  const pipeline=proposal?(choice===null?proposal.pipeline:proposal.alternatives[choice]?.pipeline??proposal.pipeline):null;
-  const confirmedTotal=cost(plan);
-  const dirty=JSON.stringify(plan)!==JSON.stringify(reviewedPlan);
-  const selectAssistant=(id:Assistant)=>{setActive(id);setView('table');};
-  const update=(next:Plan,message='')=>{setState(s=>updatePlan(s,next,message));setChoice(null);setApplied(false);};
-  const changePreferences=(changes:Partial<Pick<Plan,'guests'|'vegetarians'|'budget'>>)=>update(preferences(plan,changes));
-  const restore=(item:Item)=>update({...plan,quantities:{...plan.quantities,[item.id]:item.base}},`${item.name} restored.`);
-  const contributions=(item:Item):Assistant[]=>{
-    if(!pipeline)return [];
-    const list:Assistant[]=[];
-    if(pipeline.menu.affected.includes(item.id))list.push('menu');
-    if(pipeline.shopping.affected.includes(item.id))list.push('shopping');
-    if(pipeline.budget.drivers.includes(item.id))list.push('budget');
+  const {
+    state,
+    setState,
+    storageWarning,
+    reviewedPlan,
+    setReviewedPlan,
+    mode,
+    setMode,
+    pending,
+    error,
+    requestReview,
+    cancelReview,
+    loaded,
+  } = usePlanner();
+  const { plan, proposal } = state;
+  const [view, setView] = useState<"table" | "shopping">("table");
+  const [selected, setSelected] = useState<ItemId | null>(null);
+  const [active, setActive] = useState<Assistant | null>(null);
+  const [choice, setChoice] = useState<number | null>(null);
+  const [applied, setApplied] = useState(false);
+  const preview = proposal
+    ? choice === null
+      ? proposal.plan
+      : (proposal.alternatives[choice]?.plan ?? proposal.plan)
+    : null;
+  const pipeline = proposal
+    ? choice === null
+      ? proposal.pipeline
+      : (proposal.alternatives[choice]?.pipeline ?? proposal.pipeline)
+    : null;
+  const confirmedTotal = cost(plan);
+  const dirty = JSON.stringify(plan) !== JSON.stringify(reviewedPlan);
+  const selectAssistant = (id: Assistant) => {
+    setActive((current) => (current === id ? null : id));
+    setView("table");
+  };
+  const update = (next: Plan, message = "") => {
+    setState((s) => updatePlan(s, next, message));
+    setChoice(null);
+    setApplied(false);
+  };
+  const changePreferences = (changes: Partial<Pick<Plan, "guests" | "vegetarians" | "budget">>) =>
+    update(preferences(plan, changes));
+  const restore = (item: Item) =>
+    update(
+      { ...plan, quantities: { ...plan.quantities, [item.id]: item.base } },
+      `${item.name} restored.`,
+    );
+  const contributions = (item: Item): Assistant[] => {
+    if (!pipeline) return [];
+    const list: Assistant[] = [];
+    if (pipeline.menu.affected.includes(item.id)) list.push("menu");
+    if (pipeline.shopping.affected.includes(item.id)) list.push("shopping");
+    if (pipeline.budget.drivers.includes(item.id)) list.push("budget");
     return list;
   };
-  const relevant=(item:Item)=>active==='budget'?(pipeline??coordinate(plan,plan)).budget.drivers.includes(item.id):false;
-  const specific=(item:Item,id:Assistant)=>{
-    if(!preview||!pipeline)return '';
-    if(id==='menu')return `Planned: ${quantityLabel(plan.quantities[item.id],item)} → ${quantityLabel(preview.quantities[item.id],item)} for ${preview.guests} guests.`;
-    const row=pipeline.shopping.purchases.find(r=>r.item.id===item.id);
-    return id==='shopping'?`Purchase: ${row?.packs??0} × ${item.packageSize}${item.unit} = ${row?.purchasedQuantity??0}${item.unit}.`: `${row?.packs??0} packs × ${money(item.price)} = ${money(row?.subtotal??0)}.`;
+  const relevant = (item: Item) =>
+    active === "budget"
+      ? (pipeline ?? coordinate(plan, plan)).budget.drivers.includes(item.id)
+      : false;
+  const specific = (item: Item, id: Assistant) => {
+    if (!preview || !pipeline) return "";
+    if (id === "menu")
+      return `Planned: ${quantityLabel(plan.quantities[item.id], item)} → ${quantityLabel(preview.quantities[item.id], item)} for ${preview.guests} guests.`;
+    const row = pipeline.shopping.purchases.find((r) => r.item.id === item.id);
+    return id === "shopping"
+      ? `Purchase: ${row?.packs ?? 0} × ${item.packageSize}${item.unit} = ${row?.purchasedQuantity ?? 0}${item.unit}.`
+      : `${row?.packs ?? 0} packs × ${money(item.price)} = ${money(row?.subtotal ?? 0)}.`;
   };
-  const control=(item:Item,shopping=false)=><IngredientControl item={item} plan={plan} open={selected===item.id} onOpenChange={open=>setSelected(open?item.id:null)} onUpdate={update} explanation={<IngredientExplanation item={item} plan={plan} preview={preview} active={active}/>}><Button variant="ghost" aria-label={`Edit ${item.name}`} aria-pressed={selected===item.id} className={`${shopping?'shopping-item':'ingredient-button'} ${relevant(item)?`is-relevant agent-${active}`:''} ${preview?.quantities[item.id]===0?'proposed-removal':''}`}><FoodArt kind={item.id}/><span className="ingredient-info"><span className="ingredient-name">{item.name}</span>{(!shopping||item.id==='broth')&&<IngredientReadout item={item} plan={plan} preview={preview} active={active}/>} {relevant(item)&&<span className="cost-driver">Cost driver</span>}{plan.kept.includes(item.id)&&<span className="kept-label"><LockKeyhole/>Kept</span>}</span></Button></IngredientControl>;
-  const itemMarkers=(item:Item)=><div className="item-contributions">{contributions(item).filter(id=>active===null||id===active).map(id=>{const agent=assistants.find(a=>a.id===id);if(!agent)return null;const Icon=agent.icon;return <Popover key={id}><PopoverTrigger asChild><Button variant="ghost" className={`contribution-icon agent-${id}`} size="icon" title={`${agent.name}: ${item.name}`} aria-label={`${agent.name} contribution for ${item.name}`} onClick={()=>setActive(id)}><Icon/></Button></PopoverTrigger><PopoverContent className="item-contribution-detail" sideOffset={5}><strong>{agent.name} · {item.name}</strong><p>{specific(item,id)}</p></PopoverContent></Popover>;})}</div>;
-  const apply=()=>{if(!preview||!pipeline||pipeline.budget.overBy>0)return;setState(s=>acceptProposal(s,preview));setReviewedPlan(preview);setChoice(null);setActive(null);setApplied(true);};
-  const rows=shoppingAssistant(plan);
-  return <div className="app-shell"><a className="skip-link" href="#shared-workspace">Skip to dinner plan</a><header className="app-header"><div className="wordmark"><Soup className="brand-mark"/>Hotpot Together</div><div className="header-tools"><Button variant="ghost" size="sm" onClick={()=>setView(view==='table'?'shopping':'table')} className="list-action"><List/>{view==='table'?'Shopping list':'Back to table'}</Button><Popover><PopoverTrigger asChild><Button variant="ghost" size="sm" className="mode-label">Sample mode<Info/></Button></PopoverTrigger><PopoverContent className="sample-explanation"><strong>Sample mode</strong><p>Local sample suggestions, not live AI. Menu sets portions, Shopping calculates packages, and Budget checks sample USD prices. Your plan is saved in this browser.</p></PopoverContent></Popover><Button variant="ghost" size="icon" title="Undo" aria-label="Undo" disabled={!state.history.length} onClick={()=>{setState(undo);setChoice(null);setSelected(null);setApplied(false);setActive(null);}}><Undo2/></Button><Button variant="ghost" size="sm" aria-label="Reset" onClick={()=>{setState(s=>({...initialState(),revision:s.revision+1,message:''}));setReviewedPlan(initialPlan());setChoice(null);setSelected(null);setActive(null);setApplied(false);}}><RotateCcw/>Reset</Button></div></header>
-  <div className="planning-line"><DinnerPreferences plan={plan} onChange={changePreferences}/>{dirty&&!proposal?<Button size="sm" onClick={()=>{setState(s=>({...s,proposal:review(s.plan,s.revision),message:''}));setChoice(null);setActive(null);setSelected(null);setApplied(false);}}>Review changes<ArrowRight/></Button>:<span className="quiet-status">{proposal?'Draft settings · awaiting approval':dirty?'Draft settings':applied?'Plan applied':'Plan up to date'}</span>}</div>
-  <div className="team-bar"><AssistantTeam proposal={proposal} applied={applied} active={active} onSelect={selectAssistant}/><Button variant="ghost" size="sm" className="overview-control" aria-pressed={active===null} onClick={()=>{setActive(null);setView('table');}}>Plan overview</Button>{proposal&&<Button variant="outline" size="sm" className="view-proposal" onClick={()=>{document.getElementById('team-proposal')?.scrollIntoView({block:'start',behavior:'instant'});document.getElementById('team-proposal')?.focus();}}>View proposal</Button>}</div>
-  <main id="shared-workspace" className={`workspace ${proposal?'has-proposal':''}`}><div className="shared-plan"><div className="plan-view-label" aria-live="polite">{active==='menu'?'Menu · planned portions':active==='shopping'?'Shopping · whole-pack purchases':active==='budget'?`Budget · ${money(confirmedTotal)}${pipeline?' → '+money(pipeline.budget.total):''} estimated spending`:proposal?'Confirmed portions → proposed portions':''}</div>{view==='table'?<div className="table-board" aria-label="Shared dinner table"><div className={`pot-anchor ${plan.quantities.broth===0?'pot-unselected':''}`}><Button variant="ghost" className="pot-illustration" aria-label={plan.quantities.broth>0?'Edit selected broth':'Empty hotpot'} onClick={()=>setSelected(plan.quantities.broth>0?'broth':null)}><FoodArt kind="pot" empty={plan.quantities.broth===0}/></Button>{plan.quantities.broth>0?catalog.filter(i=>i.id==='broth').map(item=><div className="broth-control" key={item.id}>{control(item,true)}{itemMarkers(item)}</div>):<Button variant="outline" size="sm" onClick={()=>{const item=catalog.find(i=>i.id==='broth');if(item)restore(item);}}><Plus/>Choose broth</Button>}{plan.vegetarians>0&&plan.quantities.broth>0&&<span className="preparation-note"><Leaf/>Separate vegetarian side</span>}</div>{catalog.filter(i=>i.id!=='broth').map(item=><div key={item.id} className={`food-slot slot-${item.id}`}>{plan.quantities[item.id]>0?<>{control(item)}{itemMarkers(item)}</>:<Button variant="ghost" className="restore-slot" onClick={()=>restore(item)}><Plus/>{item.name}<span>Restore</span></Button>}</div>)}</div>:<div className="shopping-list"><div className="shopping-head"><span>Ingredient</span><span>Planned</span><span>Purchase</span><span>Estimate</span></div>{rows.map(({item,packs,purchasedQuantity,subtotal})=><div className={`shopping-row ${relevant(item)?`is-relevant agent-${active}`:''}`} key={item.id}><div>{control(item,true)}{itemMarkers(item)}</div><span>{quantityLabel(plan.quantities[item.id],item)}{preview&&preview.quantities[item.id]!==plan.quantities[item.id]&&<span className="shopping-proposed">→ {quantityLabel(preview.quantities[item.id],item)}</span>}</span><span>{packs} × {item.packageSize}{item.unit}<small>= {quantityLabel(purchasedQuantity,item)}</small>{preview&&packages(preview.quantities[item.id],item)!==packs&&<span className="shopping-proposed">→ {packages(preview.quantities[item.id],item)} × {item.packageSize}{item.unit} = {quantityLabel(packages(preview.quantities[item.id],item)*item.packageSize,item)}</span>}</span><span>{money(subtotal)}{preview&&packages(preview.quantities[item.id],item)!==packs&&<span className="shopping-proposed">→ {money(packages(preview.quantities[item.id],item)*item.price)}</span>}</span></div>)}{catalog.filter(i=>plan.quantities[i.id]===0).map(item=><Button variant="ghost" size="sm" key={item.id} onClick={()=>restore(item)}><Plus/>Restore {item.name}</Button>)}</div>}
-  </div>
-  {proposal&&pipeline&&<JointProposal proposal={proposal} pipeline={pipeline} confirmed={plan} confirmedTotal={confirmedTotal} choice={choice} onChoice={setChoice} active={active} onSelect={selectAssistant} onApply={apply} onDismiss={()=>{setState(s=>({...s,proposal:null,message:''}));setChoice(null);setActive(null);}}/>}</main>
-  <div className="workspace-bottom"><p className="status-message" role="status">{storageWarning?'Browser saving unavailable. This plan lasts for this visit only.':state.message}</p><Popover><PopoverTrigger asChild><Button variant="ghost" className="budget-summary" aria-label="Budget details"><span className="cost-number">{money(confirmedTotal)} <span>/ {money(plan.budget)}</span></span><ChevronDown/></Button></PopoverTrigger><PopoverContent align="end" className="budget-details"><strong>Confirmed purchases</strong><div className="budget-breakdown">{rows.map(row=><div key={row.item.id}><span>{row.item.name}</span><span>{row.packs} × {money(row.item.price)} = {money(row.subtotal)}</span></div>)}</div><p>{money(Math.abs(plan.budget-confirmedTotal))} {confirmedTotal>plan.budget?'over budget':'remaining'}</p><small>Sample estimates · USD</small></PopoverContent></Popover></div><div className="price-disclosure">Sample estimates · USD</div></div>;
+  const control = (item: Item, shopping = false) => (
+    <IngredientControl
+      item={item}
+      plan={plan}
+      open={selected === item.id}
+      onOpenChange={(open) => setSelected(open ? item.id : null)}
+      onUpdate={update}
+      explanation={
+        <IngredientExplanation item={item} plan={plan} preview={preview} active={active} />
+      }
+    >
+      <Button
+        variant="ghost"
+        aria-label={`Edit ${item.name}`}
+        aria-pressed={selected === item.id}
+        className={`${shopping ? "shopping-item" : "ingredient-button"} ${relevant(item) ? `is-relevant agent-${active}` : ""} ${preview?.quantities[item.id] === 0 ? "proposed-removal" : ""}`}
+      >
+        <FoodArt kind={item.id} />
+        <span className="ingredient-info">
+          <span className="ingredient-name">{item.name}</span>
+          {(!shopping || item.id === "broth") && (
+            <IngredientReadout item={item} plan={plan} preview={preview} active={active} />
+          )}{" "}
+          {relevant(item) && <span className="cost-driver">Cost driver</span>}
+          {plan.kept.includes(item.id) && (
+            <span className="kept-label">
+              <LockKeyhole />
+              Kept
+            </span>
+          )}
+        </span>
+      </Button>
+    </IngredientControl>
+  );
+  const itemMarkers = (item: Item) => (
+    <div className="item-contributions">
+      {contributions(item)
+        .filter((id) => active === null || id === active)
+        .map((id) => {
+          const agent = assistants.find((a) => a.id === id);
+          if (!agent) return null;
+          const Icon = agent.icon;
+          return (
+            <Popover key={id}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className={`contribution-icon agent-${id}`}
+                  size="icon"
+                  title={`${agent.name}: ${item.name}`}
+                  aria-label={`${agent.name} contribution for ${item.name}`}
+                  onClick={() => setActive(id)}
+                >
+                  <Icon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="item-contribution-detail" sideOffset={5}>
+                <strong>
+                  {agent.name} · {item.name}
+                </strong>
+                <p>{specific(item, id)}</p>
+              </PopoverContent>
+            </Popover>
+          );
+        })}
+    </div>
+  );
+  const apply = () => {
+    if (!preview || !pipeline || pipeline.budget.overBy > 0) return;
+    const accepted = acceptProposal(state, preview);
+    if (accepted === state) return;
+    setState(accepted);
+    setReviewedPlan(preview);
+    setChoice(null);
+    setActive(null);
+    setApplied(true);
+  };
+  const rows = shoppingAssistant(plan);
+  return (
+    <div className="app-shell">
+      <a className="skip-link" href="#shared-workspace">
+        Skip to dinner plan
+      </a>
+      <header className="app-header">
+        <div className="wordmark">
+          <Soup className="brand-mark" />
+          Hotpot Together
+        </div>
+        <div className="header-tools">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setView(view === "table" ? "shopping" : "table")}
+            className="list-action"
+          >
+            <List />
+            {view === "table" ? "Shopping list" : "Back to table"}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="mode-label" aria-label="Planning mode">
+                {mode === "sample" ? "Sample mode" : "Live AI mode"}
+                <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setMode("sample")}>
+                Sample mode · local portion rules
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setMode("live")}>
+                Live AI mode · Menu recommendations
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="How assistants work"
+                className="mode-info"
+              >
+                <Info />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="sample-explanation">
+              <strong>{mode === "sample" ? "Sample mode" : "Live AI mode"}</strong>
+              <p>
+                {mode === "sample"
+                  ? "Local sample suggestions, not live AI. Menu uses portion rules. Your sample plan is saved in this browser."
+                  : "Menu uses AI to recommend catalog ingredients and quantities. Live mode changes last for this visit."}{" "}
+                Shopping calculates whole packs from Menu’s quantities. Budget calculates sample USD
+                costs and rule-based alternatives. Recommendations change the plan only after Apply.
+              </p>
+            </PopoverContent>
+          </Popover>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Undo"
+            aria-label="Undo"
+            disabled={!state.history.length}
+            onClick={() => {
+              setState(undo);
+              setChoice(null);
+              setSelected(null);
+              setApplied(false);
+              setActive(null);
+            }}
+          >
+            <Undo2 />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label="Reset"
+            onClick={() => {
+              setState((s) => ({ ...initialState(), revision: s.revision + 1, message: "" }));
+              setReviewedPlan(initialPlan());
+              setChoice(null);
+              setSelected(null);
+              setActive(null);
+              setApplied(false);
+            }}
+          >
+            <RotateCcw />
+            Reset
+          </Button>
+        </div>
+      </header>
+      <div className="planning-line">
+        <DinnerPreferences plan={plan} onChange={changePreferences} />
+        <div className="review-controls">
+          <span className="quiet-status">
+            {pending
+              ? "Menu is preparing recommendations…"
+              : proposal
+                ? "Awaiting your approval"
+                : dirty
+                  ? "Settings changed · review needed"
+                  : applied
+                    ? "Plan applied"
+                    : "Plan up to date"}
+          </span>
+          {!proposal && (
+            <Button
+              size="sm"
+              disabled={pending || !loaded}
+              onClick={() => {
+                setChoice(null);
+                setActive(null);
+                setSelected(null);
+                setApplied(false);
+                void requestReview();
+              }}
+            >
+              {pending ? "Reviewing…" : dirty ? "Review changes" : "Review plan"}
+              <ArrowRight />
+            </Button>
+          )}
+          {pending && (
+            <Button variant="ghost" size="sm" onClick={cancelReview}>
+              Cancel review
+            </Button>
+          )}
+        </div>
+      </div>
+      <div className="team-bar">
+        <AssistantTeam
+          pending={pending}
+          proposal={proposal}
+          applied={applied}
+          active={active}
+          onSelect={selectAssistant}
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="overview-control"
+          aria-pressed={active === null}
+          onClick={() => {
+            setActive(null);
+            setView("table");
+          }}
+        >
+          Plan overview
+        </Button>
+        {proposal && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="view-proposal"
+            onClick={() => {
+              document
+                .getElementById("team-proposal")
+                ?.scrollIntoView({ block: "start", behavior: "instant" });
+              document.getElementById("team-proposal")?.focus();
+            }}
+          >
+            View proposal
+          </Button>
+        )}
+      </div>
+      <div className="review-feedback" aria-live="polite">
+        {error && (
+          <div role="alert" className="review-error">
+            <p>{error}</p>
+            {mode === "live" && (
+              <Button variant="outline" size="sm" onClick={() => setMode("sample")}>
+                Switch to Sample mode
+              </Button>
+            )}
+          </div>
+        )}
+        {pending && (
+          <p role="status">
+            Menu recommends ingredients → Shopping derives whole packs → Budget checks costs.
+            Editing the plan cancels this review.
+          </p>
+        )}
+      </div>
+      <main id="shared-workspace" className={`workspace ${proposal ? "has-proposal" : ""}`}>
+        <div className="shared-plan">
+          <div className="plan-view-label" aria-live="polite">
+            {active === "menu"
+              ? "Menu · planned portions"
+              : active === "shopping"
+                ? "Shopping · whole-pack purchases"
+                : active === "budget"
+                  ? `Budget · ${money(confirmedTotal)}${pipeline ? " → " + money(pipeline.budget.total) : ""} estimated spending`
+                  : proposal
+                    ? "Confirmed portions → proposed portions"
+                    : ""}
+          </div>
+          {view === "table" ? (
+            <div className="table-board" aria-label="Shared dinner table">
+              <div className={`pot-anchor ${plan.quantities.broth === 0 ? "pot-unselected" : ""}`}>
+                <Button
+                  variant="ghost"
+                  className="pot-illustration"
+                  aria-label={plan.quantities.broth > 0 ? "Edit selected broth" : "Empty hotpot"}
+                  onClick={() => setSelected(plan.quantities.broth > 0 ? "broth" : null)}
+                >
+                  <FoodArt kind="pot" empty={plan.quantities.broth === 0} />
+                </Button>
+                {plan.quantities.broth > 0 ? (
+                  catalog
+                    .filter((i) => i.id === "broth")
+                    .map((item) => (
+                      <div className="broth-control" key={item.id}>
+                        {control(item, true)}
+                        {itemMarkers(item)}
+                      </div>
+                    ))
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const item = catalog.find((i) => i.id === "broth");
+                      if (item) restore(item);
+                    }}
+                  >
+                    <Plus />
+                    Choose broth
+                  </Button>
+                )}
+                {plan.vegetarians > 0 && plan.quantities.broth > 0 && (
+                  <span className="preparation-note">
+                    <Leaf />
+                    Separate vegetarian side
+                  </span>
+                )}
+              </div>
+              {catalog
+                .filter((i) => i.id !== "broth")
+                .map((item) => (
+                  <div key={item.id} className={`food-slot slot-${item.id}`}>
+                    {plan.quantities[item.id] > 0 ? (
+                      <>
+                        {control(item)}
+                        {itemMarkers(item)}
+                      </>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        className="restore-slot"
+                        onClick={() => restore(item)}
+                      >
+                        <Plus />
+                        {item.name}
+                        <span>Restore</span>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <div className="shopping-list">
+              <div className="shopping-head">
+                <span>Ingredient</span>
+                <span>Planned</span>
+                <span>Purchase</span>
+                <span>Estimate</span>
+              </div>
+              {rows.map(({ item, packs, purchasedQuantity, subtotal }) => (
+                <div
+                  className={`shopping-row ${relevant(item) ? `is-relevant agent-${active}` : ""}`}
+                  key={item.id}
+                >
+                  <div>
+                    {control(item, true)}
+                    {itemMarkers(item)}
+                  </div>
+                  <span>
+                    {quantityLabel(plan.quantities[item.id], item)}
+                    {preview && preview.quantities[item.id] !== plan.quantities[item.id] && (
+                      <span className="shopping-proposed">
+                        → {quantityLabel(preview.quantities[item.id], item)}
+                      </span>
+                    )}
+                  </span>
+                  <span>
+                    {packs} × {item.packageSize}
+                    {item.unit}
+                    <small>= {quantityLabel(purchasedQuantity, item)}</small>
+                    {preview && packages(preview.quantities[item.id], item) !== packs && (
+                      <span className="shopping-proposed">
+                        → {packages(preview.quantities[item.id], item)} × {item.packageSize}
+                        {item.unit} ={" "}
+                        {quantityLabel(
+                          packages(preview.quantities[item.id], item) * item.packageSize,
+                          item,
+                        )}
+                      </span>
+                    )}
+                  </span>
+                  <span>
+                    {money(subtotal)}
+                    {preview && packages(preview.quantities[item.id], item) !== packs && (
+                      <span className="shopping-proposed">
+                        → {money(packages(preview.quantities[item.id], item) * item.price)}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              ))}
+              {catalog
+                .filter((i) => plan.quantities[i.id] === 0)
+                .map((item) => (
+                  <Button variant="ghost" size="sm" key={item.id} onClick={() => restore(item)}>
+                    <Plus />
+                    Restore {item.name}
+                  </Button>
+                ))}
+            </div>
+          )}
+        </div>
+        {proposal && pipeline && (
+          <JointProposal
+            proposal={proposal}
+            pipeline={pipeline}
+            confirmed={plan}
+            confirmedTotal={confirmedTotal}
+            choice={choice}
+            onChoice={setChoice}
+            active={active}
+            onSelect={selectAssistant}
+            onApply={apply}
+            onDismiss={() => {
+              setState((s) => ({ ...s, proposal: null, message: "" }));
+              setChoice(null);
+              setActive(null);
+            }}
+          />
+        )}
+      </main>
+      <div className="workspace-bottom">
+        <p className="status-message" role="status">
+          {storageWarning
+            ? "Browser saving unavailable. This plan lasts for this visit only."
+            : state.message}
+        </p>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" className="budget-summary" aria-label="Budget details">
+              <span className="cost-number">
+                {money(confirmedTotal)} <span>/ {money(plan.budget)}</span>
+              </span>
+              <ChevronDown />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="budget-details">
+            <strong>Confirmed purchases</strong>
+            <div className="budget-breakdown">
+              {rows.map((row) => (
+                <div key={row.item.id}>
+                  <span>{row.item.name}</span>
+                  <span>
+                    {row.packs} × {money(row.item.price)} = {money(row.subtotal)}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p>
+              {money(Math.abs(plan.budget - confirmedTotal))}{" "}
+              {confirmedTotal > plan.budget ? "over budget" : "remaining"}
+            </p>
+            <small>Sample estimates · USD</small>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="price-disclosure">Sample estimates · USD</div>
+    </div>
+  );
 }
