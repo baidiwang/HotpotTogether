@@ -105,13 +105,17 @@ A managed Lovable key is not automatically exported to an independent Worker.
    workspace API key, and stored secret values cannot be viewed. Leave this key
    managed by Lovable; do not replace it with a user-supplied provider key.
 2. In that project's **More → Settings → Secrets → Add secret**, add the two
-   application runtime configuration values (no credential needs to be pasted):
+   application runtime configuration values (both were saved in this project during
+   the November 11 verification; no credential needs to be pasted):
    - `HOTPOT_AI_ENABLED` = `true`
    - `HOTPOT_AI_MODEL` = `google/gemini-3.8-flash`
 3. Sync the current application code to the connected GitHub branch so Lovable
    builds the new server function, then refresh/rebuild the preview. Local
    uncommitted changes are not automatically present in Lovable. Secret changes
-   apply immediately in preview, and require publishing for the live app.
+   are described by the UI as applying immediately in preview, and require
+   publishing for the live app. Verify the actual model ID in the AI activity
+   record: a saved configuration change alone is not proof that an existing
+   preview instance has switched models.
 4. In preview, choose **Live AI mode** and run the complete review/Apply/Undo
    workflow. Check **More → AI** for the actual model request and usage. Only after
    preview verification, publish the current version with **Publish**, then repeat
@@ -120,9 +124,10 @@ A managed Lovable key is not automatically exported to an independent Worker.
 `google/gemini-3.8-flash` and `google/gemini-3.1-flash-lite` are present in the
 workspace model catalog inspected on November 11, 2026. Lovable's official
 `@lovable.dev/ai-gateway@0.1.11` contracts expose both on the Chat Completions
-surface with JSON-schema response formatting. These are contract-compatible
-candidates; a successful real call with this application's schema is still
-required to call either one end-to-end verified. The broader model list also
+surface with JSON-schema response formatting. Gemini 3.8 Flash was subsequently verified through real gateway calls and
+the complete preview workflow below. Flash Lite remains contract-compatible but
+was not proven to be the model used by the running preview: the successful
+activity records continued to identify Gemini 3.8 Flash. The broader model list also
 contains image, audio, Responses-only and Messages models; presence in that list
 alone does not make a model compatible with this endpoint. The app does not
 silently select a default model.
@@ -152,6 +157,50 @@ Sample mode resumes browser saving of the current plan.
 This is a competition prototype without login or a shared database. The server
 function is CSRF protected but not authenticated or backed by a distributed quota;
 configure hosting access/usage limits for a credential-enabled public demo.
+
+### Real preview verification — November 11, 2026
+
+The implementation was committed as `de28b47` and pushed to the connected `main`
+branch. Lovable's editor showed the GitHub sync and ran the updated full-stack
+preview at `https://preview--hotpot-table-together.lovable.app/`. Preview access
+may require project authorization; do not share token-bearing preview links.
+
+Observed in the actual browser and Lovable AI activity records:
+
+- The initial Gemini 3.8 Flash request was cancelled at the app's 30-second
+  deadline. The gateway recorded 42.1 seconds and a generated response. No plan
+  was applied and no sample output was substituted.
+- A request with **8 guests / 1 vegetarian** succeeded; Menu retained the original
+  quantities. Shopping calculated 14 whole packs and Budget $99.
+- A request with **8 guests / 8 vegetarians** succeeded. The activity record
+  explicitly identified `chat_completions`, `google/gemini-3.8-flash`, **Success**,
+  and **13.2 seconds**. The returned quantities kept the existing plant portions
+  and broth and set beef to 0. Shopping derived 11 whole packs and Budget $51.
+- Before Apply, the confirmed plan still contained 900 g of beef (3 packs, $48)
+  and its total remained $99; the proposal showed removal and a $48 decrease.
+- **Apply plan** removed beef from the confirmed shopping list, left 11 packs,
+  and showed $69 remaining from the $120 limit. The other package subtotals were
+  $8 + $10 + $8 + $5 + $8 + $4 + $8 = $51.
+- **Undo** restored 900 g beef, 3 beef packs, $48 beef cost and the original
+  complete pre-acceptance plan. The sample catalog remains the pricing source.
+
+The two successful activity records both used Gemini 3.8 Flash. An attempted
+Secrets change to Flash Lite did not establish a model switch in the running
+instance; the saved configuration was therefore set back to the verified
+`google/gemini-3.8-flash`. The 30-second deadline remains a real limitation:
+future slow requests can time out and must be retried explicitly.
+
+Separately, the production Cloudflare Worker build was run locally with Wrangler.
+A real HTTP page request returned SSR HTML with status 200. A serialized POST to
+the generated `/_serverFn/…` endpoint returned status 200 and the expected missing
+configuration result in that credential-free local runtime. This proves the
+production build includes a working backend, not merely static assets.
+
+**Deployment boundary:** the Lovable project showed **Not published**, and no
+Publish action was performed. The remote preview backend and its real gateway
+calls are verified; a publicly published production origin and production
+Apply/Undo flow remain unverified until publication. Local Live AI also remains
+unconfigured because no project credential was exported to this machine.
 
 ### Verification
 
