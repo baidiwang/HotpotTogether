@@ -1,0 +1,29 @@
+[
+  {
+    "clientWidth": 375,
+    "documentWidth": 375,
+    "dpr": 1,
+    "height": 844,
+    "scale": 1,
+    "scrollY": 0,
+    "width": 390
+  },
+  {
+    "clientWidth": 1425,
+    "documentWidth": 1425,
+    "dpr": 1,
+    "height": 900,
+    "scale": 1,
+    "scrollY": 0,
+    "width": 1440
+  },
+  {
+    "clientWidth": 945,
+    "documentWidth": 945,
+    "dpr": 1,
+    "height": 900,
+    "scale": 1,
+    "scrollY": 0,
+    "width": 960
+  }
+]

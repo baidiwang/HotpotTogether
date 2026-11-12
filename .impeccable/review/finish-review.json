@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-12",
+  "artifact": "src/routes/index.tsx",
+  "mode": "operate",
+  "buildPath": "code-led",
+  "seed": "seed:08831c8d365aaa57",
+  "reviewer": "fresh isolated agent using degraded/finish-reviewer.md",
+  "initialDisposition": "fix",
+  "finalDisposition": "ship",
+  "scope": "Verdict pass on the four material fixes from the initial review; not a new whole-surface review.",
+  "fixes": [
+    { "finding": "Broth preview lacked individual Reject and Why", "score": "resolved" },
+    { "finding": "Mobile tofu and lotus suggestion controls clipped", "score": "resolved" },
+    { "finding": "Desktop ghost plates overlapped neighboring text", "score": "resolved" },
+    { "finding": "New Casey seat was offscreen in mobile friend strip", "score": "resolved" }
+  ],
+  "captureValidity": "All required recaptures valid according to reviewer.",
+  "captures": [
+    "../../../outputs/playable-table-1440x900.jpg",
+    "../../../outputs/playable-table-960x900.jpg",
+    "../../../outputs/playable-table-390.jpg",
+    "../../../outputs/playable-broth-preview.jpg"
+  ],
+  "detector": { "runCount": 1, "findings": [] }
+}

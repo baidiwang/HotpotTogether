@@ -1,6 +1,95 @@
-# Screenshot Perfect Match
+# Hotpot Together — playable table experiment
 
-Implement exactly the screenshot and nothing else
+The home route on `experiment/playable-table` is a direct-manipulation dinner
+table. It starts with six friends, selected food worth $99 and a $120 budget.
+The previous implementation is preserved in Git at `dd37953` and the local
+`checkpoint/pre-playable-table-dd37953` branch. This experiment has not been
+merged into `main` or verified in the Lovable preview.
+
+## Run the experiment
+
+Use Node 22.12+ and Bun, with the committed lockfile:
+
+```sh
+bun install --frozen-lockfile
+bun run dev --host 127.0.0.1 --port 8081
+```
+
+Open the URL printed by Vite (normally `http://127.0.0.1:8081/`). The same
+process serves the frontend and TanStack Start backend. Sample mode needs no
+credentials. Local Live mode remains unconfigured; its explicit setup error was
+verified, and it never silently substitutes Sample output. Server credentials
+and deployment details are documented below under **Backend runtime and request
+path** and **Enable real AI in Lovable**. Never put credentials in a `VITE_`
+variable or paste them into chat.
+
+## Play the complete flow
+
+1. Choose **Sample mode** and **Reset**.
+2. Click **One more friend? / Add a vegetarian seat**. Casey joins as a
+   vegetarian; suggestions appear automatically beside the selected plates.
+3. Click the **×** on the translucent beef suggestion to reject the reduction.
+   The remaining suggestions honestly show the resulting budget gap.
+4. Click the pin beside **Beef rolls**. **Must keep 3+** means the assistant
+   must retain beef and at least the three currently selected plates.
+5. Click a translucent food plate to accept it individually, or **Place together**
+   to accept the remaining valid changes. **No thanks** rejects the whole offer.
+6. Open **Shopping list**. Selected purchases are the default; expand a row for
+   internal quantities, whole packages and surplus. **Undo** restores the prior
+   complete table, including friends and preferences.
+
+The browser-verified Sample run kept beef at 3 plates / 900 g / three $16 packs.
+The selected total stayed $99 during suggestions. With beef kept, the first
+candidate cost $121; Budget's actual $1-over-budget feedback led to one Sample
+Menu revision, reducing enoki from three plates to two and bringing the proposal
+to $116. Individually accepting tofu first changed the selected total to $103;
+placing the rest changed it to $116. Two Undo clicks restored $103, then $99.
+This is deterministic Sample evidence, not a real model call.
+
+Friends' seat labels open dietary preferences and removal. Tray **+** buttons
+and selected plates' **−/+** buttons edit immediately. Dragging tray → table
+adds one plate; table → tray removes one. Suggestions can also be dragged onto
+the table. Native drag payload handlers have automated regression coverage;
+browser verification used the click alternatives. There is no ordering step.
+
+### Data and control rules
+
+- Main interaction units are plates (broth uses servings). Internal sizes are
+  napa 200 g, enoki 150 g, tofu 300 g, beef 300 g, lotus 150 g, noodles 250 g,
+  bok choy 150 g, and broth one set per serving. These conversions and package
+  details are available in the shopping drawer.
+- Manual edits immediately update selected food and deterministic purchases.
+  Assistant suggestions remain separate and translucent until accepted.
+- **Must keep** protects ingredient presence and the current minimum quantity
+  against assistant changes. Users can edit that minimum themselves; removing
+  the final kept plate requires unpinning first.
+- Menu uses the existing server-side model endpoint in Live mode, with validated
+  catalog IDs, preferences, kept quantities and fixed plate sizes. Shopping rounds
+  quantities into whole packs; Budget sums their real catalog costs. These two
+  roles are deterministic calculations, not independent model calls. One bounded
+  Menu revision receives concrete Budget feedback when required.
+- Whole-plate rounding happens before package and budget checks. Over-budget
+  suggestions show the exact gap and cannot be accepted. Individual acceptance
+  revalidates the current purchases; necessary savings must be accepted first.
+- Edits, mode changes, Undo and Reset cancel pending requests. Generation,
+  revision, request identity and mode checks discard late results. Live edits are
+  debounced 300 ms to batch input; displayed processing represents actual work.
+  Short-lived role badges describe actual calculated actions, with evidence
+  available through **Why** and the shopping drawer.
+- The experiment uses its own `hotpot-playable-table-v1` Sample storage key;
+  the old planner's stored state is preserved. History contains complete snapshots.
+
+Validation: 64 tests cover the original rules and new plate workflow, partial
+acceptance, keep constraints, whole-pack Budget feedback, stale Live responses,
+honest setup errors, broth decisions and drag handlers. TypeScript and production
+build checks also run. Browser checks cover 1440×900, 960×900 and 390×844 CSS
+viewports with no horizontal page overflow.
+
+## Existing project and backend documentation
+
+The following describes the existing project infrastructure and prior review UI.
+Its earlier **Review changes / Apply plan** instructions apply to the previous
+version; the experimental home route uses the direct controls above.
 
 This project was built with [Lovable](https://lovable.dev).
 

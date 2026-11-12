@@ -128,6 +128,7 @@ export type ReviewAttempt = {
   feedback: ConstraintFeedback;
   feasible: boolean;
   changedFromPrevious: ItemId[];
+  portionRounding?: { id: ItemId; requested: number; planned: number }[];
 };
 export type Alternative = { title: string; explanation: string; plan: Plan; pipeline: Pipeline };
 export type PlannerMode = "sample" | "live";

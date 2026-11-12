@@ -1,0 +1,542 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T05:45:39.149798Z",
+  "title": "Design System: Hotpot Together",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Soft Paper",
+        "tonalRamp": [
+          "oklch(0.15 0.0009 106.4)",
+          "oklch(0.26 0.0015 106.4)",
+          "oklch(0.37 0.0022 106.4)",
+          "oklch(0.49 0.0026 106.4)",
+          "oklch(0.61 0.0026 106.4)",
+          "oklch(0.73 0.0026 106.4)",
+          "oklch(0.85 0.0016 106.4)",
+          "oklch(0.95 0.0005 106.4)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Botanical Ink",
+        "tonalRamp": [
+          "oklch(0.15 0.0032 132.6)",
+          "oklch(0.26 0.0056 132.6)",
+          "oklch(0.37 0.0079 132.6)",
+          "oklch(0.49 0.0097 132.6)",
+          "oklch(0.61 0.0097 132.6)",
+          "oklch(0.73 0.0097 132.6)",
+          "oklch(0.85 0.0058 132.6)",
+          "oklch(0.95 0.0019 132.6)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Quiet Supporting Ink",
+        "tonalRamp": [
+          "oklch(0.15 0.0044 128.8)",
+          "oklch(0.26 0.0077 128.8)",
+          "oklch(0.37 0.0110 128.8)",
+          "oklch(0.49 0.0133 128.8)",
+          "oklch(0.61 0.0133 128.8)",
+          "oklch(0.73 0.0133 128.8)",
+          "oklch(0.85 0.0080 128.8)",
+          "oklch(0.95 0.0027 128.8)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Pale Hairline",
+        "tonalRamp": [
+          "oklch(0.15 0.0042 121.7)",
+          "oklch(0.26 0.0072 121.7)",
+          "oklch(0.37 0.0103 121.7)",
+          "oklch(0.49 0.0125 121.7)",
+          "oklch(0.61 0.0125 121.7)",
+          "oklch(0.73 0.0125 121.7)",
+          "oklch(0.85 0.0075 121.7)",
+          "oklch(0.95 0.0025 121.7)"
+        ]
+      },
+      "tomato": {
+        "role": "primary",
+        "displayName": "Tomato",
+        "tonalRamp": [
+          "oklch(0.15 0.0517 31.6)",
+          "oklch(0.26 0.0897 31.6)",
+          "oklch(0.37 0.1276 31.6)",
+          "oklch(0.49 0.1552 31.6)",
+          "oklch(0.61 0.1552 31.6)",
+          "oklch(0.73 0.1552 31.6)",
+          "oklch(0.85 0.0931 31.6)",
+          "oklch(0.95 0.0310 31.6)"
+        ]
+      },
+      "leaf": {
+        "role": "secondary",
+        "displayName": "Leaf",
+        "tonalRamp": [
+          "oklch(0.15 0.0258 151.2)",
+          "oklch(0.26 0.0448 151.2)",
+          "oklch(0.37 0.0637 151.2)",
+          "oklch(0.49 0.0775 151.2)",
+          "oklch(0.61 0.0775 151.2)",
+          "oklch(0.73 0.0775 151.2)",
+          "oklch(0.85 0.0465 151.2)",
+          "oklch(0.95 0.0155 151.2)"
+        ]
+      },
+      "table": {
+        "role": "neutral",
+        "displayName": "Pale Table",
+        "tonalRamp": [
+          "oklch(0.15 0.0040 116.8)",
+          "oklch(0.26 0.0070 116.8)",
+          "oklch(0.37 0.0099 116.8)",
+          "oklch(0.49 0.0121 116.8)",
+          "oklch(0.61 0.0121 116.8)",
+          "oklch(0.73 0.0121 116.8)",
+          "oklch(0.85 0.0073 116.8)",
+          "oklch(0.95 0.0024 116.8)"
+        ]
+      },
+      "porcelain": {
+        "role": "neutral",
+        "displayName": "Porcelain",
+        "tonalRamp": [
+          "oklch(0.15 0.0018 95.1)",
+          "oklch(0.26 0.0031 95.1)",
+          "oklch(0.37 0.0044 95.1)",
+          "oklch(0.49 0.0054 95.1)",
+          "oklch(0.61 0.0054 95.1)",
+          "oklch(0.73 0.0054 95.1)",
+          "oklch(0.85 0.0032 95.1)",
+          "oklch(0.95 0.0011 95.1)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(0.15 0.0000 0.0)",
+          "oklch(0.26 0.0000 0.0)",
+          "oklch(0.37 0.0000 0.0)",
+          "oklch(0.49 0.0000 0.0)",
+          "oklch(0.61 0.0000 0.0)",
+          "oklch(0.73 0.0000 0.0)",
+          "oklch(0.85 0.0000 0.0)",
+          "oklch(0.95 0.0000 0.0)"
+        ]
+      },
+      "vegetarian-soft": {
+        "role": "secondary",
+        "displayName": "Vegetarian Soft",
+        "tonalRamp": [
+          "oklch(0.15 0.0061 127.1)",
+          "oklch(0.26 0.0106 127.1)",
+          "oklch(0.37 0.0151 127.1)",
+          "oklch(0.49 0.0184 127.1)",
+          "oklch(0.61 0.0184 127.1)",
+          "oklch(0.73 0.0184 127.1)",
+          "oklch(0.85 0.0110 127.1)",
+          "oklch(0.95 0.0037 127.1)"
+        ]
+      },
+      "control-hover": {
+        "role": "neutral",
+        "displayName": "Control Hover",
+        "tonalRamp": [
+          "oklch(0.15 0.0065 122.8)",
+          "oklch(0.26 0.0112 122.8)",
+          "oklch(0.37 0.0160 122.8)",
+          "oklch(0.49 0.0194 122.8)",
+          "oklch(0.61 0.0194 122.8)",
+          "oklch(0.73 0.0194 122.8)",
+          "oklch(0.85 0.0117 122.8)",
+          "oklch(0.95 0.0039 122.8)"
+        ]
+      },
+      "kept-soft": {
+        "role": "secondary",
+        "displayName": "Protected Food Soft",
+        "tonalRamp": [
+          "oklch(0.15 0.0071 127.4)",
+          "oklch(0.26 0.0123 127.4)",
+          "oklch(0.37 0.0175 127.4)",
+          "oklch(0.49 0.0213 127.4)",
+          "oklch(0.61 0.0213 127.4)",
+          "oklch(0.73 0.0213 127.4)",
+          "oklch(0.85 0.0128 127.4)",
+          "oklch(0.95 0.0043 127.4)"
+        ]
+      },
+      "ghost-line": {
+        "role": "neutral",
+        "displayName": "Pending Plate Line",
+        "tonalRamp": [
+          "oklch(0.15 0.0226 138.6)",
+          "oklch(0.26 0.0391 138.6)",
+          "oklch(0.37 0.0556 138.6)",
+          "oklch(0.49 0.0677 138.6)",
+          "oklch(0.61 0.0677 138.6)",
+          "oklch(0.73 0.0677 138.6)",
+          "oklch(0.85 0.0406 138.6)",
+          "oklch(0.95 0.0135 138.6)"
+        ]
+      },
+      "budget-gap": {
+        "role": "neutral",
+        "displayName": "Purchase Overage",
+        "tonalRamp": [
+          "oklch(0.15 0.0452 32.4)",
+          "oklch(0.26 0.0783 32.4)",
+          "oklch(0.37 0.1114 32.4)",
+          "oklch(0.49 0.1355 32.4)",
+          "oklch(0.61 0.1355 32.4)",
+          "oklch(0.73 0.1355 32.4)",
+          "oklch(0.85 0.0813 32.4)",
+          "oklch(0.95 0.0271 32.4)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Short invitation above the table; 26px mobile override."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Shopping drawer title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Ingredient tray question."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "General interface copy and invitation."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Compact actions, choices and response copy."
+      },
+      "food-name": {
+        "displayName": "Food Name",
+        "purpose": "Medium-weight names beside confirmed plates."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Portion and supporting detail."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Selected purchase cost; tabular figures and 25px mobile override."
+      }
+    },
+    "tonalRampProvenance": "Eight-step OKLCH ramps synthesized from each observed token for panel display only; these are not additional shipped palette tokens.",
+    "shadows": [
+      {
+        "name": "table-contact",
+        "value": "0 9px 28px #25352205",
+        "purpose": "Faint separation between table oval and paper."
+      },
+      {
+        "name": "porcelain-contact",
+        "value": "0 5px 9px #38442a09",
+        "purpose": "Soft object contact under each plate."
+      }
+    ],
+    "motion": [
+      {
+        "name": "pending-arrival-duration",
+        "value": "240ms",
+        "purpose": "Pending plate opacity/blur reveal only under prefers-reduced-motion: no-preference."
+      },
+      {
+        "name": "pending-arrival-ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Fast, soft pending-plate arrival."
+      },
+      {
+        "name": "drawer-open-duration",
+        "value": "500ms",
+        "purpose": "Existing shared sheet open timing."
+      },
+      {
+        "name": "drawer-close-duration",
+        "value": "300ms",
+        "purpose": "Existing shared sheet close timing."
+      },
+      {
+        "name": "assistant-callout-lifetime",
+        "value": "6500ms",
+        "purpose": "Temporary concrete role callouts; persistent reason control remains available."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1100px"
+      },
+      {
+        "name": "mobile-table-grid",
+        "value": "760px"
+      }
+    ],
+    "focus": {
+      "value": "2px solid #b94431",
+      "offset": "4px",
+      "purpose": "Playable and popover buttons and shopping disclosure summaries; inherited input focus remains browser-native."
+    },
+    "overlay": {
+      "value": "rgba(37, 49, 31, 0.16)",
+      "purpose": "Shopping drawer scrim."
+    },
+    "tokenScope": {
+      "playable": "src/playable.css .playable-table scoped --pt-* custom properties",
+      "shared": "src/styles.css retains older root OKLCH values used by shared portal defaults and SVG fallback. Do not use them as a second playable palette.",
+      "snippetBinding": "Snippets use observed custom-property names when available and literal fallbacks because the playable variables are scoped, not root variables. The raster artwork is documented separately rather than encoded into preview snippets."
+    },
+    "assetProvenance": {
+      "assets": [
+        {
+          "path": "src/assets/food-beef.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "b3e9dae1613931645ded881e1e65a7cb59eb6fbe",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-bok.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "984b250b36d41c79c35ab2b900897c5a648fc73c",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-broth.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "2c16f9e70b10e03e4a3ab0dcdb908b10a7832d6d",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-enoki.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "f1df33256d7217192deba23f760eac307933e25b",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-lotus.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "0dd58e15c6ea0e96679c4e1f0cdfe1317fa88ae2",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-napa.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "ee84c4374d05cc666d4b850a9ed7ee203e35ef15",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-noodles.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "532ac12d77f734323f3fc5e385516ff5d879da38",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-pot.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "8e8f9567d29fb9b924cfc956b0c5589bc88b3b48",
+          "unchangedFromCheckpoint": true
+        },
+        {
+          "path": "src/assets/food-tofu.png",
+          "source": "Existing repository PNG cutout",
+          "checkpoint": "dd37953",
+          "gitBlob": "a48d87de3b1afa558bc62c9b0bbcd35ff7f72eea",
+          "unchangedFromCheckpoint": true
+        }
+      ],
+      "importer": "src/components/food-art.tsx",
+      "creatorHistory": "Earlier creator, generator and license history are not established by available repository evidence.",
+      "rasterChanges": "None in this implementation or documentation pass.",
+      "fallback": "Existing code-native empty-pot SVG; no newly generated food raster."
+    },
+    "verification": {
+      "sources": [
+        "src/playable.css",
+        "src/components/playable-table.tsx",
+        "src/styles.css",
+        "src/lib/plate-portions.ts",
+        "PRODUCT.md",
+        ".impeccable/surfaces/src-routes-index-tsx.md"
+      ],
+      "captures": [
+        "../outputs/playable-table-1440x900.jpg",
+        "../outputs/playable-table-960x900.jpg",
+        "../outputs/playable-table-390.jpg",
+        "../outputs/playable-shopping.jpg",
+        "../outputs/playable-broth-preview.jpg"
+      ],
+      "measurementsFile": ".impeccable/review/viewport-measurements.json",
+      "viewportMeasurements": [
+        {
+          "clientWidth": 375,
+          "documentWidth": 375,
+          "dpr": 1,
+          "height": 844,
+          "scale": 1,
+          "scrollY": 0,
+          "width": 390
+        },
+        {
+          "clientWidth": 1425,
+          "documentWidth": 1425,
+          "dpr": 1,
+          "height": 900,
+          "scale": 1,
+          "scrollY": 0,
+          "width": 1440
+        },
+        {
+          "clientWidth": 945,
+          "documentWidth": 945,
+          "dpr": 1,
+          "height": 900,
+          "scale": 1,
+          "scrollY": 0,
+          "width": 960
+        }
+      ],
+      "direction": {
+        "mode": "Operate",
+        "authority": "Code-led user-directed replacement; no approved comp or quality-bar image.",
+        "candidate": 3,
+        "seed": "08831c8d365aaa57"
+      },
+      "finishDisposition": "Ship at the scope of the four resolved finish-review fixes only."
+    },
+    "notCanonized": [
+      "Older root palette is retained for shared defaults, not promoted as a second playable palette.",
+      "Compact 9px–10px annotations are observed, not prescribed as a universal minimum.",
+      "Review scope is four resolved findings; this documentation does not assert full-state perfection."
+    ]
+  },
+  "components": [
+    {
+      "name": "Place Together",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Accept all remaining valid suggestions; source keeps the hover state quiet.",
+      "html": "<button class=\"ds-primary\">Place together <svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14m-7-7 7 7 7-7\"/></svg></button>",
+      "css": ".ds-primary{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 12px;font-size:12px;font-weight:400;background:var(--pt-tomato,#b94431);color:#fff;border:0;border-radius:6px;cursor:pointer}.ds-primary:hover{background:var(--pt-tomato,#b94431)}.ds-primary:focus-visible{outline:2px solid var(--pt-tomato,#b94431);outline-offset:4px;}.ds-primary:disabled{opacity:.4;cursor:not-allowed}"
+    },
+    {
+      "name": "Plate Quantity Action",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Small circular, object-adjacent quantity control; mobile grows to 30px square.",
+      "html": "<button class=\"ds-quantity\" aria-label=\"Add one plate of Napa cabbage\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></button>",
+      "css": ".ds-quantity{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);width:27px;height:26px;display:grid;place-items:center;padding:0;background:transparent;color:var(--pt-ink,#30332e);border:0;border-radius:50%;cursor:pointer}.ds-quantity:hover{background:#e2e7d9}.ds-quantity:focus-visible{outline:2px solid var(--pt-tomato,#b94431);outline-offset:4px;}.ds-quantity:active{cursor:pointer}.ds-quantity:disabled{opacity:.4;cursor:not-allowed}@media(max-width:760px){.ds-quantity{width:30px;height:30px}}"
+    },
+    {
+      "name": "Budget Field",
+      "kind": "input",
+      "refersTo": "budget-field",
+      "description": "Visible label with the existing inset, border and browser-native input focus.",
+      "html": "<label class=\"ds-budget-label\" for=\"ds-budget-input\">Budget for the table ($)<input class=\"ds-budget-input\" id=\"ds-budget-input\" type=\"number\" min=\"0\" max=\"10000\" value=\"120\"></label>",
+      "css": ".ds-budget-label{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);display:block;max-width:214px;color:var(--pt-ink,#30332e);font-size:14px}.ds-budget-input{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);display:block;width:100%;margin-top:8px;padding:8px;border:1px solid var(--pt-line,#dfe2d9);border-radius:4px;color:var(--pt-ink,#30332e);caret-color:var(--pt-tomato,#b94431);font-size:14px}.ds-budget-input:hover{border-color:var(--pt-line,#dfe2d9)}.ds-budget-input:focus-visible{outline:auto}"
+    },
+    {
+      "name": "Table Tool Row",
+      "kind": "nav",
+      "refersTo": "toolbar",
+      "description": "Plain compact actions with a divider before Shopping list; no navigation-card styling.",
+      "html": "<div class=\"ds-tools\"><button class=\"ds-mode\">Sample mode <svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button><button>Reset</button><button class=\"ds-shopping\">Shopping list</button></div>",
+      "css": ".ds-tools{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);display:flex;align-items:center;justify-content:flex-end;gap:16px;min-height:76px;border-bottom:1px solid var(--pt-line,#dfe2d9);color:var(--pt-ink,#30332e);background:var(--pt-paper,#fcfcfa)}.ds-tools button{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:4px 6px;border:0;background:transparent;color:inherit;font-size:14px;cursor:pointer}.ds-tools .ds-mode{font-size:12px;color:var(--pt-muted,#63675f)}.ds-tools .ds-shopping{border-left:1px solid var(--pt-line,#dfe2d9);padding-left:18px}.ds-tools button:hover{background:transparent}.ds-tools button:focus-visible{outline:2px solid var(--pt-tomato,#b94431);outline-offset:4px;}@media(max-width:760px){.ds-tools{gap:8px;flex-wrap:wrap}.ds-tools .ds-mode{margin-right:auto}.ds-tools button,.ds-tools .ds-mode{font-size:11px}}"
+    },
+    {
+      "name": "Vegetarian Seat",
+      "kind": "chip",
+      "refersTo": "seat-vegetarian",
+      "description": "A native seat button combines a leaf, a person name and an explicit dietary label.",
+      "html": "<button class=\"ds-seat\" aria-label=\"Edit Casey's preference\"><span class=\"ds-person\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10Z\"/><path d=\"M2 22c0-6 6-12 12-14\"/></svg></span><span class=\"ds-name\">Casey</span><span class=\"ds-diet\">Vegetarian</span></button>",
+      "css": ".ds-seat{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);display:flex;flex-direction:column;align-items:center;width:104px;padding:0;background:transparent;border:0;text-align:center;color:var(--pt-ink,#30332e);cursor:pointer}.ds-person{display:grid;place-items:center;width:36px;height:36px;border:1px solid #b7c8ac;border-radius:50%;background:#e8eee1;color:var(--pt-leaf,#376744)}.ds-person svg{width:17px;height:17px;stroke-width:1.5}.ds-name{font-size:12px;font-weight:500;margin-top:4px}.ds-diet{font-size:11px;line-height:1.4;color:var(--pt-leaf,#376744)}.ds-seat:hover{background:transparent}.ds-seat:focus-visible{outline:2px solid var(--pt-tomato,#b94431);outline-offset:4px;}@media(max-width:760px){.ds-seat{width:76px}.ds-person{width:30px;height:30px}.ds-diet{font-size:10px}}"
+    },
+    {
+      "name": "Porcelain Place Setting",
+      "kind": "card",
+      "refersTo": "porcelain-plate",
+      "description": "UI-only material specimen. Production places the unchanged PNG cutout above this porcelain wrapper.",
+      "html": "<div class=\"ds-place-setting\"><div class=\"ds-porcelain\"></div><strong>Silken tofu</strong><span>2 plates</span></div>",
+      "css": ".ds-place-setting{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);width:148px;text-align:center;color:var(--pt-ink,#30332e)}.ds-porcelain{position:relative;width:116px;height:66px;margin:0 auto 5px;border:1px solid #e4e4db;border-radius:50%;background:#fffefa;box-shadow:0 5px 9px #38442a09}.ds-porcelain:after{content:\"\";position:absolute;inset:5px 7px;border:1px solid #eeeee6;border-radius:50%;pointer-events:none}.ds-place-setting strong{display:block;font-size:12px;line-height:1.4;font-weight:500}.ds-place-setting>span{display:block;font-size:11px;line-height:1.4;color:var(--pt-muted,#63675f)}@media(max-width:760px){.ds-place-setting{width:100%}.ds-porcelain{width:80px;height:48px}.ds-place-setting strong{font-size:11px}.ds-place-setting>span{font-size:10px}}"
+    },
+    {
+      "name": "Pending Plate",
+      "kind": "custom",
+      "refersTo": "ghost-plate",
+      "description": "UI-only pending material specimen; production reuses translucent PNG food at opacity 0.43 inside this wrapper.",
+      "html": "<button class=\"ds-pending\" aria-label=\"Accept tofu suggestion\"><span class=\"ds-pending-art\"></span><span class=\"ds-pending-label\">+1 suggested</span></button>",
+      "css": ".ds-pending{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);display:flex;flex-direction:column;align-items:center;width:74px;padding:0;border:0;background:transparent;color:var(--pt-leaf,#376744);cursor:pointer}.ds-pending-art{display:grid;place-items:center;width:64px;height:42px;border:1px dashed #64825b;border-radius:50%;background:#f5f8eea6;transform:rotate(6deg)}.ds-pending-label{padding:3px 4px;background:#fcfcfaeb;border-radius:3px;white-space:nowrap;font-size:10px}.ds-pending:hover{background:transparent}.ds-pending:focus-visible{outline:2px solid var(--pt-tomato,#b94431);outline-offset:4px;}@media(prefers-reduced-motion:no-preference){.ds-pending{animation:ds-arrive 240ms cubic-bezier(.16,1,.3,1)}@keyframes ds-arrive{from{opacity:.3;filter:blur(2px)}to{opacity:1;filter:blur(0)}}@media(max-width:760px){.ds-pending{width:65px}.ds-pending-art{width:58px;height:39px}.ds-pending-label{font-size:8px}}"
+    },
+    {
+      "name": "Expandable Purchase Row",
+      "kind": "custom",
+      "refersTo": "purchase-row",
+      "description": "UI-only disclosure specimen showing the implemented type, hairline and portion-to-package detail; raster thumbnail omitted.",
+      "html": "<details class=\"ds-purchase\"><summary><span><strong>Beef rolls</strong><small>3 plates</small></span><span>$48 <svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></span></summary><div class=\"ds-package\"><p>One plate = 300 g.</p><p>Planned 900 g → buy 3 × 300 g.</p><p>900 g purchased · 0 g surplus.</p><p>3 × $16 = $48.</p></div></details>",
+      "css": ".ds-purchase{font-family:var(--font-sans,\"Instrument Sans\",system-ui,sans-serif);max-width:404px;border-bottom:1px solid var(--pt-line,#dfe2d9);background:var(--pt-paper,#fcfcfa);color:var(--pt-ink,#30332e)}.ds-purchase summary{display:flex;gap:14px;align-items:center;min-height:92px;list-style:none;cursor:pointer}.ds-purchase summary::-webkit-details-marker{display:none}.ds-purchase summary>span:first-child{flex:1}.ds-purchase strong{display:block;font-size:13px;font-weight:500}.ds-purchase small{display:block;margin-top:3px;font-size:11px;color:var(--pt-muted,#63675f)}.ds-purchase summary>span:last-child{display:flex;align-items:center;gap:9px;font-size:12px}.ds-purchase summary:hover{background:transparent}.ds-purchase summary:focus-visible{outline:2px solid var(--pt-tomato,#b94431);outline-offset:4px;}.ds-package{padding:0 0 14px 0;color:var(--pt-muted,#63675f);font-size:12px}.ds-package p{margin:4px 0;line-height:1.6}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Quiet Place-Setting Ritual",
+    "overview": "The built playable table makes dinner planning feel like arranging a shared meal: soft food cutouts sit on pale porcelain, friends have named seats, and controls stay beside the object they change. Space, restrained Instrument Sans and a light paper ground carry the hierarchy. Tomato marks the main acceptance action; leaf green carries dietary and protected-food meaning.\n\nThe user's NONO MARKET references establish generous white space, soft food texture and reserved typography. Their commerce composition is not a layout template. The previous form, role tabs and review card are the confirmed visual anti-reference for this replacement. This document records the implemented playable surface; the surface contract retains its particular composition and interaction story.",
+    "keyCharacteristics": [
+      "Object-adjacent controls and short English labels.",
+      "Solid selected food and translucent, explicitly optional suggestions.",
+      "Quiet boundaries, pale material layers and restrained color.",
+      "One reused type family and unchanged repository food artwork."
+    ],
+    "rules": [
+      {
+        "name": "The Meaningful Accent Rule",
+        "body": "Use Tomato for commitment and Leaf for dietary, protected and suggested states; retain text or an icon so color is never the only signal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Hierarchy Rule",
+        "body": "Build hierarchy with size, spacing and regular-to-medium weight; keep labels in natural sentence case and keep the interface English.",
+        "section": "typography"
+      },
+      {
+        "name": "The Material Depth Rule",
+        "body": "Give food and porcelain a soft contact cue; keep separators and empty space responsible for interface grouping.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep controls beside the friend, plate or pot they change.",
+      "Do preserve the distinction between solid selected food and translucent unaccepted suggestions.",
+      "Do reuse Instrument Sans and the existing food cutouts.",
+      "Do pair dietary, protected and suggestion color with explicit words or SVG icons.",
+      "Do preserve visible focus, keyboard/click alternatives to dragging, and the mobile friends strip.",
+      "Do derive portions, package costs and assistant explanations from the shared calculations."
+    ],
+    "donts": [
+      "Don't restore the previous form, role-tab and review-card composition as the table's template.",
+      "Don't treat NONO MARKET's commerce layout as the application's layout template.",
+      "Don't present an unaccepted plate or preview cost as part of the confirmed table.",
+      "Don't describe deterministic Shopping or Budget calculations as separate model calls.",
+      "Don't imply Live is configured locally or silently switch a failed Live request to Sample.",
+      "Don't add game timers, levels, character movement, checkout or invented stock."
+    ]
+  }
+}

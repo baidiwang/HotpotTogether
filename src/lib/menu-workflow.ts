@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { plateSizes } from "./plate-portions";
 import {
   buildProposal,
   catalog,
@@ -16,6 +17,7 @@ export const reviewRequestSchema = z
     revision: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
     requestId: z.string().min(1).max(80),
     userRequest: z.string().trim().min(1).max(240),
+    presentation: z.literal("plates").optional(),
   })
   .strict();
 export type ReviewRequest = z.infer<typeof reviewRequestSchema>;
@@ -84,6 +86,7 @@ export function menuContext(request: ReviewRequest) {
     guests: request.plan.guests,
     vegetarianGuests: request.plan.vegetarians,
     budgetUSD: request.plan.budget,
+    ...(request.presentation === "plates" ? { portionSizes: plateSizes } : {}),
     catalog: catalog.map((item) => ({
       ...item,
       maximumQuantity: maxQuantity(item),
