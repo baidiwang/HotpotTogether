@@ -129,7 +129,7 @@ function AttemptRecord({ attempt }: { attempt: ReviewAttempt }) {
       </div>
       {attempt.feedback.violations.length > 0 && (
         <>
-          <strong>Feedback sent to Menu</strong>
+          <strong>Calculated constraint feedback</strong>
           <p>
             {money(attempt.feedback.overage)} actual overage. Protected:{" "}
             {attempt.feedback.protectedIngredients.length

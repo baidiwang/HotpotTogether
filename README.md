@@ -254,6 +254,45 @@ unconfigured because no project credential was exported to this machine.
 
 ### Verification
 
+The bounded workflow and shared review workspace were committed as `d6b48cf`
+and synced to Lovable preview. The new live eight-person / one-vegetarian example
+with kept beef and the unchanged $120 limit passed on its **first** Menu attempt:
+Napa 1,000 g, enoki 300 g, tofu 600 g, beef 900 g, lotus 300 g, noodles 500 g,
+bok choy 600 g and one broth set. Shopping calculated 15 whole packs and Budget
+calculated **$103**. The UI correctly reported no revision needed. Apply updated
+the confirmed shopping list, and Undo restored Napa 800 g, bok choy 300 g and
+the original $99 plan. This was a real Gemini 3.8 Flash call, not a mocked test.
+
+A separate real-model request with eight guests, one vegetarian, the same kept
+900 g beef and a **$50** limit completed both bounded attempts in the browser.
+The initial recommendation cost **$76**. Its calculated **$26** overage and
+package/constraint feedback drove a revision costing **$72**: Napa 1,900 g,
+beef 900 g, one broth set and zero for the remaining items. Shopping calculated
+eight whole packs (2,000 g purchased Napa, 100 g surplus); Budget calculated
+$16 + $48 + $8 = $72, still **$22 over**. The UI reported unresolved after two
+attempts, disabled Apply, displayed explicit constraint-adjustment choices and
+left confirmed quantities and their $99 total untouched. The record carried a
+request ID and plan revision 3. No third call or sample substitution occurred.
+An earlier live $50 run was also recorded as two successful Gemini 3.8 Flash
+gateway calls under one request ID; the second was labeled `attempt 2` and took
+29.3 seconds. The final attempt's calculated feedback is labeled as calculated,
+without claiming it was sent for a nonexistent third revision. Real conflict
+screenshots were captured at both 1440×900 and 1280×800 with scale 1.
+
+The preview is credential-enabled and its backend is verified. Local Live AI
+still has no exported project credential, and public production remains
+unpublished/unverified; no Publish action was taken during this change.
+
+Local validation passed **52 tests**, TypeScript and the production build. Changed
+files have zero ESLint errors (three existing Fast Refresh export warnings).
+The previously documented whole-repository formatting debt remains outside this
+change. Sample browser checks also covered keeping enoki during review,
+invalidating the previous proposal, rerunning with both kept minimums, Apply and
+Undo, and the $50 unresolved conflict with Apply disabled. Desktop review was
+measured at 1440×900, 1280×800 and 1024×800 at scale 1; bottom sheets were checked
+at 875×1000 and 390×844. Desktop screenshots include a revision/conflict result,
+the original circular tabletop and visible decision controls.
+
 ```sh
 bun run test
 bunx tsc --noEmit
