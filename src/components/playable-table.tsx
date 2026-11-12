@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState, type DragEvent } from "react";
+import { useState, type DragEvent } from "react";
 import {
   ArrowDown,
-  ArrowRight,
   Check,
   ChefHat,
   ChevronDown,
@@ -11,6 +10,7 @@ import {
   LockKeyhole,
   Minus,
   Plus,
+  Pin,
   RotateCcw,
   ShoppingBag,
   Soup,
@@ -18,7 +18,11 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { FoodArt } from "./food-art";
+import {
+  TableIllustration as FoodArt,
+  FriendIllustration,
+  EmptySeatIllustration,
+} from "./table-illustration";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
   DropdownMenu,
@@ -56,14 +60,18 @@ function FriendSeat({
     <Popover>
       <PopoverTrigger asChild>
         <button
-          className={`pt-seat pt-seat-${index} ${friend.vegetarian ? "is-vegetarian" : ""}`}
+          className={`pt-seat pt-seat-${index} ${friend.vegetarian ? "is-vegetarian" : ""} ${friend.id === 0 ? "is-you" : ""}`}
           aria-label={`Edit ${friend.name}'s preference`}
         >
-          <span className="pt-seat-person">{friend.vegetarian ? <Leaf /> : <UserRound />}</span>
-          <span className="pt-seat-name">{friend.name}</span>
-          <span className="pt-seat-diet">
-            {friend.vegetarian ? "Vegetarian" : "Eats everything"}
+          <span className="pt-seat-person">
+            <FriendIllustration id={friend.id} />
           </span>
+          <span className="pt-seat-name">{friend.name}</span>
+          {friend.vegetarian && (
+            <span className="pt-seat-diet">
+              <Leaf /> Vegetarian
+            </span>
+          )}
         </button>
       </PopoverTrigger>
       <PopoverContent className="pt-popover" aria-label={`${friend.name}'s preference`}>
@@ -155,32 +163,19 @@ function FoodReason({ item, table }: { item: Item; table: Controller }) {
 function FoodPlate({
   item,
   table,
-  badges,
   onDrag,
 }: {
   item: Item;
   table: Controller;
-  badges: boolean;
   onDrag: (event: DragEvent, value: PlateDrag) => void;
 }) {
+  const [selected, setSelected] = useState(false);
   const { plan } = table.snapshot;
   const count = plateCount(plan, item.id);
   const target = table.offer?.target;
   const delta = target ? plateCount(target, item.id) - count : 0;
   const kept = plan.kept.includes(item.id);
   if (!count && !delta) return null;
-  const purchaseDelta = target
-    ? (packages(target.quantities[item.id], item) - packages(plan.quantities[item.id], item)) *
-      item.price
-    : 0;
-  const changed = changedPlates(table.offer, plan);
-  const menuItem = changed.find((i) => i.id === "tofu") ?? changed[0];
-  const shoppingItem =
-    changed.find(
-      (i) =>
-        i.id !== menuItem?.id &&
-        packages(target!.quantities[i.id], i) !== packages(plan.quantities[i.id], i),
-    ) ?? menuItem;
   const firstPlan = table.offer?.source.attempts[0]?.pipeline.menu.plan;
   const revisedPlan = table.offer?.source.attempts.length === 2 ? table.offer.source.plan : null;
   const budgetSaving =
@@ -190,22 +185,52 @@ function FoodPlate({
         item.price
       : 0;
   return (
-    <div className={`pt-food pt-food-${item.id} ${delta ? "has-suggestion" : ""}`}>
+    <div
+      className={`pt-food pt-food-${item.id} ${delta ? "has-suggestion" : ""} ${selected ? "is-selected" : ""}`}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setSelected(false);
+      }}
+    >
       {count > 0 && (
         <div
           className="pt-selected-plate"
+          role="button"
+          tabIndex={0}
           draggable
           onDragStart={(event) => onDrag(event, { id: item.id, from: "table" })}
           aria-label={`${item.name}, ${platesLabel(count)} selected`}
+          aria-expanded={selected}
+          aria-controls={`pt-controls-${item.id}`}
+          onFocus={() => setSelected(true)}
+          onClick={() => setSelected(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              setSelected(true);
+            }
+          }}
         >
           <div className="pt-porcelain">
             <FoodArt kind={item.id} />
           </div>
           <strong>{item.name}</strong>
           <span className="pt-plate-amount">{platesLabel(count)}</span>
+          {kept && (
+            <span
+              className="pt-kept-marker"
+              title={`Must keep: assistants retain at least ${platesLabel(count)}.`}
+            >
+              <Pin />
+              <span className="sr-only">Must keep {count}+</span>
+            </span>
+          )}
         </div>
       )}
-      <div className="pt-plate-controls">
+      <div
+        className="pt-plate-controls"
+        id={`pt-controls-${item.id}`}
+        aria-label={`Edit ${item.name}`}
+      >
         <button
           aria-label={`Remove one plate of ${item.name}`}
           disabled={!count || (kept && count === 1)}
@@ -227,16 +252,13 @@ function FoodPlate({
           onClick={() => table.toggleKeep(item.id)}
           title="Assistants keep at least your selected plates. You can still edit them."
         >
-          <LockKeyhole />
+          <Pin />
         </button>
       </div>
-      {kept && (
-        <span className="pt-kept-label">
-          <LockKeyhole /> Must keep {count}+
-        </span>
-      )}
       {!!delta && (
-        <div className={`pt-ghost ${delta < 0 ? "is-reduction" : ""}`}>
+        <div
+          className={`pt-ghost ${delta < 0 ? "is-reduction" : ""} ${!count ? "is-new-food" : ""}`}
+        >
           <button
             className="pt-ghost-plate"
             draggable
@@ -246,10 +268,18 @@ function FoodPlate({
             onClick={() => table.accept(item.id)}
             aria-label={`Accept ${item.name} suggestion`}
           >
-            <span className="pt-ghost-art">
-              <FoodArt kind={item.id} />
+            {!count && (
+              <span className="pt-ghost-art">
+                <FoodArt kind={item.id} />
+              </span>
+            )}
+            {!count && <strong>{item.name}</strong>}
+            <span className="pt-offer-quantity">
+              {count} → {count + delta} plates
             </span>
-            <span>{delta > 0 ? `+${delta}` : `−${-delta}`} suggested</span>
+            <span className="pt-offer-use">
+              <Check /> Use
+            </span>
           </button>
           <button
             className="pt-reject"
@@ -264,26 +294,6 @@ function FoodPlate({
       {!delta && budgetSaving > 0 && (
         <div className="pt-feedback-why">
           <FoodReason item={item} table={table} />
-        </div>
-      )}
-      {badges && (!!delta || budgetSaving > 0) && (
-        <div className="pt-food-actions" aria-label={`Assistant actions for ${item.name}`}>
-          {!!delta && menuItem?.id === item.id && (
-            <span>
-              <ChefHat /> Menu {delta > 0 ? "+" : ""}
-              {delta} {Math.abs(delta) === 1 ? "plate" : "plates"}
-            </span>
-          )}
-          {!!delta && shoppingItem?.id === item.id && (
-            <span>
-              <ShoppingBag /> Shopping {signed(purchaseDelta)}
-            </span>
-          )}
-          {budgetSaving > 0 && (
-            <span className="pt-budget-action">
-              <CircleDollarSign /> Budget saves {money(budgetSaving)}
-            </span>
-          )}
         </div>
       )}
     </div>
@@ -437,19 +447,6 @@ export function PlayableTable() {
   const { plan, friends } = table.snapshot;
   const [shopping, setShopping] = useState(false);
   const [dragging, setDragging] = useState<PlateDrag | null>(null);
-  const [badges, setBadges] = useState(false);
-  const friendsRef = useRef<HTMLDivElement>(null);
-  const previousFriendCount = useRef(friends.length);
-  useEffect(() => {
-    if (
-      friends.length > previousFriendCount.current &&
-      document.documentElement.clientWidth < 761
-    ) {
-      const strip = friendsRef.current;
-      strip?.scrollTo?.({ left: strip.scrollWidth, behavior: "instant" });
-    }
-    previousFriendCount.current = friends.length;
-  }, [friends.length]);
   const changes = changedPlates(table.offer, plan);
   const suggested = table.offer?.target;
   const selectedTotal = cost(plan);
@@ -458,12 +455,17 @@ export function PlayableTable() {
   const source = table.offer?.source;
   const first = source?.attempts[0];
   const last = source?.attempts.at(-1);
-  const activeOfferId = table.offer?.requestId;
-  useEffect(() => {
-    setBadges(!!activeOfferId);
-    const timer = setTimeout(() => setBadges(false), 6500);
-    return () => clearTimeout(timer);
-  }, [activeOfferId]);
+  const leadChange = changes.find((item) => item.id === "tofu") ?? changes[0];
+  const leadDelta =
+    leadChange && suggested
+      ? plateCount(suggested, leadChange.id) - plateCount(plan, leadChange.id)
+      : 0;
+  const vegetarianFriend = friends.filter((friend) => friend.vegetarian).at(-1);
+  const suggestionMessage = leadChange
+    ? leadDelta > 0
+      ? `Menu suggests ${leadDelta === 1 ? "an extra plate" : `${leadDelta} extra plates`} of ${leadChange.name.toLowerCase()} ${leadChange.id === "tofu" && vegetarianFriend ? `for ${vegetarianFriend.name}` : "for the table"}.`
+      : `Menu suggests ${plateCount(plan, leadChange.id)} → ${plateCount(suggested!, leadChange.id)} plates of ${leadChange.name.toLowerCase()}.`
+    : "Menu checked the selected table.";
   const startDrag = (event: DragEvent, value: PlateDrag) => {
     event.dataTransfer.setData(dragType, JSON.stringify(value));
     event.dataTransfer.effectAllowed = value.from === "tray" ? "copy" : "move";
@@ -486,13 +488,12 @@ export function PlayableTable() {
       disabled={!table.loaded || friends.length >= 30}
       aria-label="Add a vegetarian friend"
     >
-      <span>
+      <span className="pt-empty-chair">
+        <EmptySeatIllustration />
         <Plus />
       </span>
       <strong>One more friend?</strong>
-      <small>
-        <Leaf /> Add a vegetarian seat
-      </small>
+      <small>Add a vegetarian seat</small>
     </button>
   );
   return (
@@ -542,12 +543,8 @@ export function PlayableTable() {
       <main>
         <div className="pt-intro">
           <div>
-            <h1>
-              {friends.length === 6
-                ? "Good food. A little company."
-                : `Room for ${friends.length}.`}
-            </h1>
-            <p>Pull up a seat. Put another plate down.</p>
+            <h1>A table for {friends.length}.</h1>
+            <p>Tap a plate to adjust it, or bring one over.</p>
             {friends.length >= 7 && (
               <button
                 className="pt-more-friends"
@@ -562,8 +559,10 @@ export function PlayableTable() {
           <Popover>
             <PopoverTrigger asChild>
               <button className="pt-budget" aria-label="Change budget">
+                <span className="pt-budget-label">Selected table</span>
                 <span>
-                  <strong>{money(selectedTotal)}</strong> / {money(plan.budget)} <ChevronDown />
+                  <strong>{money(selectedTotal)}</strong> / {money(plan.budget)} budget{" "}
+                  <ChevronDown />
                 </span>
                 <small className={selectedTotal > plan.budget ? "pt-budget-gap" : ""}>
                   {selectedTotal > plan.budget
@@ -590,11 +589,14 @@ export function PlayableTable() {
           id="dinner-table"
           className={`pt-table-stage ${dragging && dragging.from !== "table" ? "pt-drop-ready" : ""}`}
           aria-label="Dinner table drop zone"
-          onDragOver={(event) => event.preventDefault()}
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = dragging?.from === "tray" ? "copy" : "move";
+          }}
           onDrop={(event) => drop(event, "table")}
         >
           <div className="pt-table-surface" aria-hidden="true" />
-          <div ref={friendsRef} className="pt-friends" aria-label="Friends at the table">
+          <div className="pt-friends" aria-label="Friends at the table">
             {friends.map((friend, index) => (
               <FriendSeat key={friend.id} friend={friend} index={index} table={table} />
             ))}
@@ -628,6 +630,9 @@ export function PlayableTable() {
             </Popover>
             <strong>
               {plan.quantities.broth ? "Two-way broth" : "A pot waiting to be filled"}
+              {plan.kept.includes("broth") && (
+                <Pin className="pt-pot-pin" aria-label="Must keep broth" />
+              )}
             </strong>
             <span>
               {plan.quantities.broth
@@ -654,11 +659,11 @@ export function PlayableTable() {
                   aria-label="Accept broth suggestion"
                   onClick={() => table.accept("broth")}
                 >
-                  <span className="pt-ghost-art">
-                    <FoodArt kind="broth" />
-                  </span>
-                  <span>
+                  <span className="pt-offer-quantity">
                     {plateCount(plan, "broth")} → {plateCount(suggested, "broth")} servings
+                  </span>
+                  <span className="pt-offer-use">
+                    <Check /> Use
                   </span>
                 </button>
                 <button
@@ -675,19 +680,11 @@ export function PlayableTable() {
           {catalog
             .filter((item) => item.id !== "broth")
             .map((item) => (
-              <FoodPlate
-                key={item.id}
-                item={item}
-                table={table}
-                badges={badges}
-                onDrag={startDrag}
-              />
+              <FoodPlate key={item.id} item={item} table={table} onDrag={startDrag} />
             ))}
           {friends.length < 7 && addSeat}
           <span className="pt-table-caption">
-            {dragging && dragging.from !== "table"
-              ? "Drop a plate onto the table"
-              : "Your selected plates are solid. Suggestions are translucent."}
+            {dragging && dragging.from !== "table" ? "Drop a plate onto the table" : ""}
           </span>
         </section>
         {friends.length >= 8 && (
@@ -700,21 +697,22 @@ export function PlayableTable() {
         {changes.length > 0 && (
           <div className="pt-table-response" aria-label="Suggested table changes">
             <div>
-              <span className="pt-response-source">
-                <ChefHat /> {table.mode === "sample" ? "Sample Menu" : "Menu"}
-              </span>
               <p>
-                {source && source.attempts.length > 1
-                  ? `Budget found ${money(first!.feedback.overage)} over. Menu revised once; ${last!.feasible ? "the revised suggestion passed" : "a conflict remains"}.`
-                  : "A few plate changes for the friends at your table."}
+                <ChefHat /> {suggestionMessage}
               </p>
-              <small>
-                {money(selectedTotal)} selected <ArrowRight /> {money(suggestedTotal)} with your
-                remaining suggestions
+              <span className="pt-response-impact">
+                Shopping: {signed(suggestedTotal - selectedTotal)} in whole-pack purchases.
+                {source && source.attempts.length > 1
+                  ? ` Budget asked Menu to save ${money(first!.feedback.overage)}; ${last!.feasible ? "one revision passed" : "a conflict remains after one revision"}.`
+                  : ""}
+              </span>
+              <span className="pt-suggested-cost">
+                Suggested table <strong>{money(suggestedTotal)}</strong>
                 {suggestedTotal > plan.budget
                   ? ` · ${money(suggestedTotal - plan.budget)} over budget`
                   : ""}
-              </small>
+                <span> · {table.mode === "sample" ? "Sample suggestion" : "Live Menu"}</span>
+              </span>
             </div>
             <div className="pt-response-choices">
               <button
@@ -722,7 +720,7 @@ export function PlayableTable() {
                 disabled={!canPlace}
                 onClick={() => table.accept()}
               >
-                Place together <ArrowDown />
+                Use these changes <ArrowDown />
               </button>
               <button onClick={() => table.decline()}>No thanks</button>
             </div>
@@ -741,15 +739,18 @@ export function PlayableTable() {
         <section
           className={`pt-ingredient-tray ${dragging?.from === "table" ? "pt-drop-ready" : ""}`}
           aria-label="Ingredient tray drop zone"
-          onDragOver={(event) => event.preventDefault()}
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+          }}
           onDrop={(event) => drop(event, "tray")}
         >
           <div className="pt-tray-heading">
-            <h2>Another plate?</h2>
+            <h2>Bring something to the table.</h2>
             <p>
               {dragging?.from === "table"
                 ? "Return here to remove one plate. Unmark Must keep before removing the last one."
-                : "Drag food to the table, or tap +. Return a plate here to remove it."}
+                : "Drag a plate over, or tap to add."}
             </p>
           </div>
           <div className="pt-tray-foods">

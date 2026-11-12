@@ -44,15 +44,18 @@ portions, ingredient quantities, whole-package purchases and costs.
 
 ## Brand Commitments
 
-Retain Hotpot Together's available food cutouts and restrained typography.
-The user's NONO MARKET references establish white space, gentle food textures
-and light composition; their commerce layout is not a template. The existing
-interface is evidence to replace, not a new layout template.
+Retain restrained Instrument Sans typography and the quiet brand bar. The user's
+NONO MARKET references establish soft pastel illustration, gently grainy pigment,
+soft edges, natural volume and white space; their commerce layout is not a template.
+The current playable table uses one generated illustration set for food on plates,
+the steaming pot, distinct friend portraits and an empty chair. Existing photo-like
+cutouts remain in Git for the previous implementation, not as the new table's art.
 
 ## Evidence on Hand
 
-Eight catalog ingredients, food PNG cutouts in src/assets, existing browser-safe
-dinner calculations, validated Menu server workflow, and tests. Earlier real
+Eight catalog ingredients, 17 generated transparent PNGs in src/assets/illustrated
+with exact prompt provenance, existing browser-safe dinner calculations,
+validated Menu server workflow, and tests. Earlier real
 calls verified the existing interface; they do not verify this new experiment.
 
 ## Product Principles

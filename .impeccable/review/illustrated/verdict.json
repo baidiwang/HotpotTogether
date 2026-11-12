@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-12",
+  "buildPath": "code-led",
+  "mode": "operate",
+  "concept": "continuation of seed:08831c8d365aaa57 candidate3 under the user's explicit illustrated-table direction",
+  "reviewer": "fresh isolated finish_review_illustrated agent",
+  "initialDisposition": "fix",
+  "finalDisposition": "ship",
+  "scope": "Verdict pass on the two material fixes; not whole-surface certification or native drop completion proof.",
+  "fixes": [
+    { "finding": "Compact-table lower portraits collide with suggestion controls", "score": "resolved" },
+    { "finding": "Phone/current-width header, budget and response actions crowd the right edge", "score": "resolved" }
+  ],
+  "artwork": { "generatedPngCount": 17, "promptScanMissing": 0 },
+  "detector": { "runCount": 1, "advisoryCount": 29, "result": "Advisory differences from the old DESIGN.md palette/type/radius system; new values intentional and captured in user-approved replacement documentation." },
+  "captureNotes": "Requested CSS viewport metrics are recorded separately. Native screenshots export clientWidth with uniform scaling. The fullPage driver can reflow around the hidden scrollbar and crop its right edge, so native mobile top/actions and native 660 actions are authoritative for containment.",
+  "nativeDrag": "Dragstart observed. The browser driver did not emit drop. Automated bidirectional drop handlers pass; do not claim full native drag completion."
+}

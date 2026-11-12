@@ -6,6 +6,12 @@ The previous implementation is preserved in Git at `dd37953` and the local
 `checkpoint/pre-playable-table-dd37953` branch. This experiment has not been
 merged into `main` or verified in the Lovable preview.
 
+The latest UI pass replaces the route's art with 17 generated transparent
+illustrations (see `src/assets/illustrated/prompts.json`): painted food and plates,
+a steaming pot, seven distinct portraits and an empty chair. The previous playable
+UI is saved at `0eb23d1` / `checkpoint/pre-illustration-ui-0eb23d1`. The business
+controller, calculations and Menu server interface are unchanged by this art pass.
+
 ## Run the experiment
 
 Use Node 22.12+ and Bun, with the committed lockfile:
@@ -28,11 +34,11 @@ variable or paste them into chat.
 1. Choose **Sample mode** and **Reset**.
 2. Click **One more friend? / Add a vegetarian seat**. Casey joins as a
    vegetarian; suggestions appear automatically beside the selected plates.
-3. Click the **×** on the translucent beef suggestion to reject the reduction.
+3. Click the **×** beside the **3 → 2 plates** beef suggestion to reject the reduction.
    The remaining suggestions honestly show the resulting budget gap.
-4. Click the pin beside **Beef rolls**. **Must keep 3+** means the assistant
-   must retain beef and at least the three currently selected plates.
-5. Click a translucent food plate to accept it individually, or **Place together**
+4. Select **Beef rolls**, then click the pin in its revealed controls. Its persistent
+   pin means the assistant must retain beef and at least the current three plates.
+5. Click **Use** on a quantity suggestion to accept it individually, or **Use these changes**
    to accept the remaining valid changes. **No thanks** rejects the whole offer.
 6. Open **Shopping list**. Selected purchases are the default; expand a row for
    internal quantities, whole packages and surplus. **Undo** restores the prior
@@ -46,11 +52,14 @@ to $116. Individually accepting tofu first changed the selected total to $103;
 placing the rest changed it to $116. Two Undo clicks restored $103, then $99.
 This is deterministic Sample evidence, not a real model call.
 
-Friends' seat labels open dietary preferences and removal. Tray **+** buttons
-and selected plates' **−/+** buttons edit immediately. Dragging tray → table
+Friends' portraits and seat labels open dietary preferences and removal. Only
+special preferences have a visible label. Select a plate (or focus it with the
+keyboard) to reveal **−/+** and pin controls. Tray buttons and plate **−/+** edit immediately. Dragging tray → table
 adds one plate; table → tray removes one. Suggestions can also be dragged onto
 the table. Native drag payload handlers have automated regression coverage;
-browser verification used the click alternatives. There is no ordering step.
+browser verification completed the click/keyboard alternatives. Native automation
+observed dragstart but did not deliver a drop, so full native drag completion has
+not been claimed. There is no ordering step.
 
 ### Data and control rules
 
@@ -59,7 +68,8 @@ browser verification used the click alternatives. There is no ordering step.
   bok choy 150 g, and broth one set per serving. These conversions and package
   details are available in the shopping drawer.
 - Manual edits immediately update selected food and deterministic purchases.
-  Assistant suggestions remain separate and translucent until accepted.
+  Assistant suggestions remain separate until accepted, using explicit quantity
+  transitions; food newly added to an empty place setting uses translucent art.
 - **Must keep** protects ingredient presence and the current minimum quantity
   against assistant changes. Users can edit that minimum themselves; removing
   the final kept plate requires unpinning first.
@@ -74,16 +84,19 @@ browser verification used the click alternatives. There is no ordering step.
 - Edits, mode changes, Undo and Reset cancel pending requests. Generation,
   revision, request identity and mode checks discard late results. Live edits are
   debounced 300 ms to batch input; displayed processing represents actual work.
-  Short-lived role badges describe actual calculated actions, with evidence
-  available through **Why** and the shopping drawer.
+  The short table-adjacent Menu sentence, Shopping impact and Budget feedback
+  derive from current quantities and recorded checks. Evidence remains available
+  through **Why** and the shopping drawer.
 - The experiment uses its own `hotpot-playable-table-v1` Sample storage key;
   the old planner's stored state is preserved. History contains complete snapshots.
 
-Validation: 64 tests cover the original rules and new plate workflow, partial
+Validation: 65 tests cover the original rules and new plate workflow, partial
 acceptance, keep constraints, whole-pack Budget feedback, stale Live responses,
 honest setup errors, broth decisions and drag handlers. TypeScript and production
-build checks also run. Browser checks cover 1440×900, 960×900 and 390×844 CSS
-viewports with no horizontal page overflow.
+build checks also run. Browser checks cover 1440×900, 960×1000, 660×1090 and
+390×844 CSS viewports. Direct child bounds verify controls inside the content
+gutter, independently of the legacy hidden-horizontal-overflow rule. Native mobile
+top/actions captures avoid the full-page screenshot export's scrollbar reflow/crop.
 
 ## Existing project and backend documentation
 

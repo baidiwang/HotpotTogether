@@ -1,28 +1,30 @@
 ---
 name: Hotpot Together
-description: A quiet, directly editable table for planning one shared hotpot dinner.
+description: A softly illustrated shared table for directly planning one hotpot dinner.
 colors:
   paper: "#fcfcfa"
-  ink: "#30332e"
-  muted: "#63675f"
-  line: "#dfe2d9"
-  tomato: "#b94431"
-  leaf: "#376744"
-  table: "#f0f2e9"
-  porcelain: "#fffefa"
-  white: "#ffffff"
-  vegetarian-soft: "#e8eee1"
-  control-hover: "#e2e7d9"
-  kept-soft: "#e2e9da"
-  ghost-line: "#64825b"
-  budget-gap: "#a13e2c"
+  ink: "#34362f"
+  muted: "#686c60"
+  line: "#e4e3db"
+  tomato: "#a94e39"
+  leaf: "#486c45"
+  cream: "#fffefa"
+  control-active: "#e8eddf"
+  kept-soft: "#eef1e7"
+  offer-soft: "#edf0e6d9"
+  quiet-hover: "#ede9df"
+  budget-gap: "#9b3e2c"
+  portal-ink: "#30332e"
+  portal-muted: "#63675f"
+  portal-line: "#dfe2d9"
+  portal-leaf: "#376744"
 typography:
   display:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "clamp(28px, 3vw, 42px)"
+    fontSize: "20px"
     fontWeight: 400
-    lineHeight: 1.12
-    letterSpacing: "-0.035em"
+    lineHeight: 1.3
+    letterSpacing: "-0.025em"
   headline:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
     fontSize: "28px"
@@ -30,7 +32,7 @@ typography:
     letterSpacing: "-0.025em"
   title:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "18px"
+    fontSize: "15px"
     fontWeight: 400
   body:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
@@ -39,60 +41,67 @@ typography:
     letterSpacing: "0"
   label:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "12px"
+    fontSize: "13px"
     fontWeight: 400
   food-name:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "12px"
+    fontSize: "13px"
     fontWeight: 500
     lineHeight: 1.4
   caption:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "11px"
+    fontSize: "12px"
     fontWeight: 400
-    lineHeight: 1.4
+    lineHeight: 1.5
   numeral:
     fontFamily: "Instrument Sans, system-ui, sans-serif"
-    fontSize: "30px"
+    fontSize: "27px"
     fontWeight: 400
+    lineHeight: 1.15
 rounded:
-  annotation: "3px"
   field: "4px"
-  control: "6px"
-  ellipse: "50%"
+  offer: "5px"
+  action: "6px"
+  floating-controls: "9px"
+  circle: "50%"
 spacing:
   tight: "4px"
-  close: "6px"
   compact: "8px"
   regular: "12px"
+  inset: "14px"
   section: "16px"
-  inset: "18px"
-  roomy: "20px"
+  popover: "18px"
   separated: "24px"
-  wide: "28px"
-  canvas: "48px"
+  roomy: "28px"
 components:
   button-primary:
     backgroundColor: "{colors.tomato}"
-    textColor: "{colors.white}"
+    textColor: "{colors.cream}"
     typography: "{typography.label}"
-    rounded: "{rounded.control}"
-    padding: "8px 12px"
-  button-quiet:
+    rounded: "{rounded.action}"
+    padding: "10px 14px"
+  button-quantity:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
-    typography: "{typography.label}"
-    rounded: "{rounded.ellipse}"
-    width: "27px"
-    height: "26px"
-  button-quiet-hover:
-    backgroundColor: "{colors.control-hover}"
-  button-kept:
+    rounded: "{rounded.circle}"
+    width: "34px"
+    height: "34px"
+  button-quantity-hover:
+    backgroundColor: "{colors.control-active}"
+    textColor: "{colors.leaf}"
+  kept-marker:
     backgroundColor: "{colors.kept-soft}"
     textColor: "{colors.leaf}"
-    rounded: "{rounded.ellipse}"
+    rounded: "{rounded.circle}"
+    width: "24px"
+    height: "24px"
+  suggestion-strip:
+    backgroundColor: "{colors.offer-soft}"
+    textColor: "{colors.leaf}"
+    rounded: "{rounded.offer}"
+    padding: "3px 5px"
   budget-field:
-    textColor: "{colors.ink}"
+    textColor: "{colors.portal-ink}"
     rounded: "{rounded.field}"
     padding: "8px"
     width: "100%"
@@ -100,27 +109,16 @@ components:
     backgroundColor: "{colors.paper}"
     textColor: "{colors.ink}"
     typography: "{typography.label}"
-    height: "76px"
-  seat-vegetarian:
-    backgroundColor: "{colors.vegetarian-soft}"
-    textColor: "{colors.leaf}"
-    rounded: "{rounded.ellipse}"
-    width: "36px"
-    height: "36px"
-  porcelain-plate:
-    backgroundColor: "{colors.porcelain}"
-    rounded: "{rounded.ellipse}"
-    width: "116px"
-    height: "66px"
-  ghost-plate:
-    backgroundColor: "#f5f8eea6"
-    textColor: "{colors.leaf}"
-    rounded: "{rounded.ellipse}"
-    width: "64px"
-    height: "42px"
+    height: "70px"
+  preference-popover:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.portal-ink}"
+    rounded: "{rounded.action}"
+    padding: "18px"
+    width: "250px"
   purchase-row:
     backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
+    textColor: "{colors.portal-ink}"
     typography: "{typography.label}"
 ---
 
@@ -130,145 +128,174 @@ components:
 
 **Creative North Star: "A Quiet Place-Setting Ritual"**
 
-The built playable table makes dinner planning feel like arranging a shared meal: soft food cutouts sit on pale porcelain, friends have named seats, and controls stay beside the object they change. Space, restrained Instrument Sans and a light paper ground carry the hierarchy. Tomato marks the main acceptance action; leaf green carries dietary and protected-food meaning.
+A shared meal is the visual world: softly painted food, a warm steaming pot, recognizable fictional friends and one empty chair. Pastel gouache and airbrush textures provide fine grain, softly imperfect edges and natural volume. Generous near-white space and quiet Instrument Sans leave the illustrations room to breathe. Controls appear beside the object they change.
 
-The user's NONO MARKET references establish generous white space, soft food texture and reserved typography. Their commerce composition is not a layout template. The previous form, role tabs and review card are the confirmed visual anti-reference for this replacement. This document records the implemented playable surface; the surface contract retains its particular composition and interaction story.
+The user's NONO MARKET direction governs material, whitespace and typographic restraint. The artwork is cohesive illustration: food already sits on painted porcelain, portraits have individual faces and the pot has warm volume. The interface uses Tomato for commitment and Leaf for dietary, protected and suggested states. It retains the directly editable table experiment and its separate, explicit recommendation preview.
 
 **Key Characteristics:**
-- Object-adjacent controls and short English labels.
-- Solid selected food and translucent, explicitly optional suggestions.
-- Quiet boundaries, pale material layers and restrained color.
-- One reused type family and unchanged repository food artwork.
 
-Evidence: `src/playable.css` (including its final responsive and finish-review overrides), `src/components/playable-table.tsx`, `src/styles.css`, `src/lib/plate-portions.ts`, `PRODUCT.md`, and `.impeccable/surfaces/src-routes-index-tsx.md`. The chosen study is candidate 3, seed `08831c8d365aaa57`; this was code-led Operate work with no approved comp or quality-bar image. The finish verdict covers the reviewer's four resolved fixes, not a general certification of every state.
+- Soft pastel illustration on true transparent alpha.
+- Named portraits, a warm central pot and loosely arranged place settings.
+- Quiet sentence-case labels, open space and thin functional separators.
+- Object-adjacent controls and explicit current-to-proposed quantities.
+
+Ground truth is `src/routes/index.tsx`, `src/components/playable-table.tsx`, `src/components/table-illustration.tsx` and the complete final cascade in `src/playable.css`. Instrument Sans and shared portal primitives come from `src/styles.css` and `src/components/ui/`. The code-led Operate study remains candidate 3, seed `08831c8d365aaa57`; there is no newly approved comp or quality-bar image. The surface brief records the user's subsequent literal illustration direction and this final composition. The latest finish review resolved its two reported findings and returned a ship disposition; that is its review scope.
 
 ## Colors
 
-A nearly white, slightly botanical neutral field lets the existing food assets supply most of the chroma. Frontmatter values are normative; descriptive names below explain application.
+Warm paper and botanical ink support the pastel artwork. The frontmatter owns the actual CSS colors; painted coral, butter, sage and lavender belong to the raster artwork rather than additional UI tokens.
 
 ### Primary
-- **Tomato:** Acceptance button, wordmark mark, text caret and playable focus outline. Use it to identify a committed action rather than decorate containers.
+
+- **Tomato:** The acceptance action, wordmark icon, text caret and explicit focus outline. Use it for a committed action and keyboard location.
 
 ### Secondary
-- **Leaf:** Vegetarian seats, Must keep, available budget and suggestion explanations. Vegetarian soft and kept soft distinguish the relevant states without tinting the whole interface.
+
+- **Leaf:** Vegetarian words and icons, protected-food marks, suggestion controls and remaining-budget feedback.
+- **Control active / Kept soft:** Pale botanical fills distinguish a control's selected state and the persistent pin marker.
+- **Offer soft:** A lightly translucent backing for an unaccepted quantity strip. **Quiet hover** is the separate reject/reason hover fill.
 
 ### Neutral
-- **Paper:** Playable canvas, drawer and small floating controls.
-- **Ink:** Main copy and confirmed quantities.
-- **Muted:** Supporting explanations, units and secondary tool labels.
-- **Line:** Hairline dividers in the header, tray, response and shopping list.
-- **Table:** The pale oval underneath food; it is a spatial grouping, not a generic panel color.
-- **Porcelain:** Plate surfaces. **White** is the acceptance button's text.
-- **Control hover:** Small quantity-control hover fill. **Ghost line** outlines pending plates. **Budget gap** marks an actual purchase overage.
+
+- **Paper:** The canvas, popovers and shopping drawer.
+- **Ink:** Confirmed names, quantities and primary copy. **Muted** supports secondary instructions and units.
+- **Line:** Header, tray and footer-region boundaries. **Cream** is the primary button's text.
+- **Portal ink / Portal muted / Portal line / Portal leaf:** The existing, slightly different literal colors on preferences, reasons and the shopping drawer. These describe the current portal implementation; new table content uses the scoped table palette.
+- **Budget gap:** Actual over-budget amounts and the visible request error.
 
 ### Named Rules
-**The Meaningful Accent Rule.** Use Tomato for commitment and Leaf for dietary, protected and suggested states; retain text or an icon so color is never the only signal.
 
-The scoped playable variables in `src/playable.css` are the source of these tokens. Older OKLCH variables remain in `src/styles.css` for shared primitives, portal defaults and the empty-pot SVG. They are not an alternative palette for new playable-table surfaces. Portaled content needs its own explicit paper, ink and type assignments because it sits outside the scoped canvas.
+**The Meaningful Accent Rule.** Pair dietary, protected and suggested color with words or an SVG icon; acceptance and selected prices must remain explicit.
+
+**The Painted Color Rule.** Let the illustration carry the broad pastel range. Add interface color only for a readable state or action.
+
+The table's six scoped custom properties are authoritative for new table content. Legacy root OKLCH variables still serve shared components and the former interface; they do not replace this table palette. Portals sit outside the table scope, so their paper, ink and font assignments must stay explicit.
 
 ## Typography
 
-**Display Font:** Instrument Sans, with system-ui and sans-serif fallback.
+**Display Font:** Instrument Sans, with system-ui and sans-serif fallbacks.
 **Body Font:** The same Instrument Sans stack.
 
-**Character:** Familiar, quiet and lightly weighted. The existing root loads weights 400, 500 and 600 through Google Fonts; the playable surface primarily uses regular and medium. Do not introduce another display face.
+**Character:** Quiet and familiar, with regular-to-medium weights. The root loads weights (400, 500, 600); this route primarily uses (400) and (500). There is no added decorative face.
 
 ### Hierarchy
-- **Display:** The invitation, using the fluid frontmatter role. At the mobile breakpoint it becomes (26px), retaining its tight line height and tracking.
-- **Headline:** The shopping drawer title; its tighter tracking separates it from ordinary form content.
-- **Title:** The ingredient-tray question. The wordmark is a separate medium-weight identity treatment (20px desktop; 19px mobile).
-- **Body:** Short invitations and general copy; explanatory reason and drawer paragraphs use a more open line height (1.6).
-- **Label:** Actions, preference choices and response copy. Food names use the medium food-name role; they become (11px) in the mobile table.
-- **Caption:** Amounts and supporting details; several seat, tray and provenance annotations range from (10px) to (12px) by context.
-- **Numeral:** The selected purchase cost uses tabular figures; it becomes (25px) on mobile. Drawer purchase totals use (27px).
+
+- **Display:** The short table invitation. It becomes (18px) at the mobile breakpoint.
+- **Headline:** The shopping drawer title, with tight tracking.
+- **Title:** The tray invitation. The wordmark is its own medium identity treatment (20px desktop, 19px mobile).
+- **Body:** The table response uses (14px / 1.45). Explanatory drawer and reason copy uses a more open line height (1.6).
+- **Label:** Tools, plate and pot labels, and acceptance text. Food and friend names use medium weight; amounts use the caption role.
+- **Caption:** Supporting purchase, preference and suggestion details. Several compact labels use (11px) at narrower widths; portal preference actions are kept at (14px) with minimum height (42px).
+- **Numeral:** Selected purchase cost, with tabular figures. It becomes (25px) on mobile; the drawer total stays (27px).
 
 ### Named Rules
-**The Quiet Hierarchy Rule.** Build hierarchy with size, spacing and regular-to-medium weight; keep labels in natural sentence case and keep the interface English.
 
-Some mobile annotations in the implementation are (9px–10px). These are compact-state observations, not a recommended minimum text size for future screens.
+**The Quiet Hierarchy Rule.** Build hierarchy with whitespace, size and regular-to-medium weight. Keep interface copy in English and natural sentence case.
 
 ## Layout
 
-The desktop canvas has horizontal gutters (48px), reduced to (28px) at (1100px) and (18px) at (760px). Header height is (76px). Invitation and tray containers cap at (1240px), the table stage at (1120px), and the response at (1060px). The main spacing rhythm is captured in the frontmatter; this is an observed vocabulary rather than a requirement that every measurement be a scale multiple.
+`html` reserves a stable scrollbar gutter. The desktop table canvas uses horizontal gutters (42px), a header height (70px), introduction and tray widths capped at (1180px), and a stage capped at (1200px). The stage is (574px) tall. Response content caps at (1040px); extra friends wrap beneath the stage within (1080px). The frontmatter captures the reused spacing vocabulary, not an artificial requirement that every position be a scale multiple.
 
-Above (760px), table objects use stable relative positions on an oval. The final stage height is `clamp(400px, calc(100dvh - 460px), 500px)`. Six seats sit outside the left and right edges, a seventh sits above, and additional friends appear in a wrapping row below the stage. Food controls and pending plates occupy their own object space. The tray uses eight equal columns.
+The first three portraits sit across the top rim at (25%, 50%, 75%); side seats sit at (6%, 94%), and the two lower seats at (22%, 78%). Food and the pot occupy the interior. At desktop size, food wrappers are (174px) wide and their artwork region is (160px × 96px); the pot is (230px × 220px). The pale radial pool merely joins the place settings; it has no drawn tabletop outline. Friends beyond seven appear in the separate wrapping row.
 
-At (760px) and below, the header wraps and the table becomes a three-column grid: a horizontally scrollable friends strip, an add-seat row when present, paired food around the central pot, then the table caption. All friends stay in the strip and the extra desktop row is hidden. New friends scroll into view. The tray becomes four columns. Response actions wrap underneath their explanation. Mobile quantity controls grow to (30px square), and suggestion reject/reason controls to (28px square).
+Between (761px) and (1100px), gutters become (28px), portraits become (76px), and the lower portraits move to (14%, 86%) to retain separation from the lower foods. Food wrappers become (158px), artwork regions (144px × 94px), and the pot (210px square).
 
-The right shopping drawer is `min(460px, 100vw)` wide with its own vertical scrolling. It uses padding (30px 28px) on desktop and (28px 20px) on mobile. It stays a side drawer on mobile rather than becoming a different sheet design.
+At (760px) and below, gutters become (18px), the header wraps into two rows, and the table remains a portrait ring around a vertically spaced food arrangement. The stage is (1000px) tall: three portraits across the top, side portraits/chair beside the pot region, food pairs below, then the lower portraits. The response stacks vertically. The ingredient tray becomes a horizontal scroller with (104px) items and visible add controls. All portraits remain table positions; there is no horizontal friends strip.
 
-Measured captures distinguish outer viewport from CSS content width: (1440 × 900) rendered at (1425px) client/document width; (960 × 900) at (945px); and (390 × 844) at (375px), all DPR 1 and scale 1. In each measured state document width equals client width. The record is `.impeccable/review/viewport-measurements.json`.
+At (480px) and below, gutters become (14px) and the stage becomes (1120px). Portraits are (66px square), food wrappers (160px), painted plate regions (140px × 94px), and the pot region (186px × 185px). The first food pair starts at (140px), the pot at (310px), subsequent food pairs at (560px, 750px), the final vegetable at (930px), and lower portraits at (1005px). This deliberate vertical space keeps actions and suggested quantities from colliding. The screen scrolls to the response and tray.
+
+The shopping drawer remains a right-hand surface, width `min(460px, 100vw)`, with independent vertical scrolling. Padding is (30px 28px) on desktop and (28px 20px) on mobile. Popovers cap at `calc(100vw - 24px)`.
+
+Verification uses `.impeccable/review/illustrated/desktop.jpg`, `user-960.jpg`, `user-660.jpg`, `mobile.jpg`, `mobile-actions.jpg` and `user-660-actions.jpg`. `viewport-measurements.json` records CSS viewports (1440 × 900), (960 × 1000), (660 × 1090) and (390 × 844), DPR (1) and scale (1). Their client and document widths match at (1425px, 945px, 645px, 375px). The native phone viewport and action captures are the width proof: full-page screenshot export can reflow or crop the right scrollbar gutter (15px).
 
 ## Elevation & Depth
 
-Depth comes from pale tonal layers, fine material borders and faint ambient contact shadows. The table and plate shadows describe physical objects; they are not hard offset graphic effects. The shopping overlay uses a translucent botanical scrim, keeping the table recognizable beneath the drawer. Shared Radix popovers and the drawer retain their existing utility shadows.
+Natural depth lives in the PNGs: softly rounded food, painted porcelain rims, grain, diffuse daylight and restrained lavender contact shading. CSS neither paints replacement food nor blurs photography into the style. The table itself has a quiet warm radial wash, with stops `#f6efe2`, `#f8f3e9`, `#faf8f1` and transparent paper. It uses no hard perimeter or cast shadow.
 
 ### Shadow Vocabulary
-- **Table contact** (`0 9px 28px #25352205`): The oval's faint separation from paper.
-- **Porcelain contact** (`0 5px 9px #38442a09`): A small plate's soft contact with the table.
-- **Shared floating UI:** Existing `shadow-md` and `shadow-lg` utilities in popover, menu and sheet primitives. Their generated values remain owned by the installed Tailwind build.
+
+- **Floating plate controls** (`0 4px 14px #5a463315`): Only the compact revealed action bar, on translucent paper (`#fcfcfaf5`).
+- **Shared popover / drawer:** Existing Tailwind `shadow-md` / `shadow-lg` from the installed UI primitives. Preserve their ambient role; their generated values remain owned by the build.
+- **Drawer scrim** (`#554a3629`): A warm translucent veil over the recognizable table.
 
 ### Named Rules
-**The Material Depth Rule.** Give food and porcelain a soft contact cue; keep separators and empty space responsible for interface grouping.
 
-Pending plates arrive with a brief blur-and-opacity reveal (240ms, `cubic-bezier(0.16, 1, 0.3, 1)`) only when reduced motion is not requested. The shared drawer uses its existing opening and closing timings (500ms and 300ms). There is no continuous simulation or game motion.
+**The Painted Depth Rule.** Keep the illustration's soft volume intact. Use interface elevation only to separate floating controls, popovers and the drawer.
+
+With reduced motion disabled, a suggestion arrives over (220ms) using `cubic-bezier(0.16, 1, 0.3, 1)`, opacity (0.55 → 1) and vertical movement (4px → 0). Plate-control visibility changes over (130ms ease-out). There is no food blur animation. The shared drawer retains its existing opening/closing durations (500ms / 300ms).
 
 ## Shapes
 
-The physical language is elliptical: table, porcelain, pending plates and small round object controls. Desktop porcelain is the frontmatter size; mobile porcelain is (80px × 48px). A fine inset elliptical line reinforces its rim. Pending plates use a dashed border and a small rotation (6deg), plus translucent food (opacity 0.43), so they remain distinct from selected food.
+Soft, imperfect physical silhouettes belong to the illustrations. Food includes its painted plate; the artwork wrapper adds no CSS porcelain disk, rim or shadow. Portraits are unframed busts rather than circle badges. Preserve transparent padding so complete objects and steam remain visible with `object-fit: contain`.
 
-Rectangular controls stay modestly rounded: fields use the field radius and acceptance/tray surfaces use the control radius. Annotation backgrounds use the smaller annotation radius. Keep hairline dividers between functional regions instead of enclosing every region in a card.
+Functional controls use modest corners: fields, offer strips, primary actions and floating control bars use the frontmatter radii. Small quantity and pin controls are circular. Hairline separators organize the header, tray and shopping purchases; open areas remain open.
 
 ## Components
 
 ### Buttons
-The primary acceptance action is a compact Tomato control with white text, the frontmatter padding, a minimum height (38px), and a small directional SVG. Its sibling decline action remains plain. Table quantity buttons are quiet circles; hover adds the control-hover fill, while Must keep uses kept-soft with Leaf and a lock icon. Disabled playable buttons have opacity (0.4) and a not-allowed cursor.
 
-Playable and popover buttons use a visible Tomato focus outline (2px, offset 4px). Source button hover treatments are restrained; the primary action does not acquire an invented lift or scale effect. Every drag operation also has a native button action.
+The primary **Use these changes** action is compact Tomato with Cream text, frontmatter padding, minimum height (40px), radius (6px) and a downward SVG. **No thanks** remains plain. Avoid invented hover lifts or scale changes. Disabled table buttons use opacity (0.42) and a not-allowed cursor.
+
+A plate's minus, plus and pin controls appear on hover, focus within or explicit plate click. Each action is (34px square), arranged with gap (4px) inside the translucent floating bar. Hover and selected pin use the botanical control fill. Leaving the focused plate closes its selected control state. A separate persistent pin marker remains visible after the control bar hides.
+
+Playable buttons, preference/reason buttons, selected plates and shopping summaries receive a visible Tomato focus outline (2px, offset 4px). Every drag operation has a click/keyboard equivalent. The skip link appears on focus and targets the table.
 
 ### Seats and dietary marks
-Named seat buttons contain a circular person or leaf mark with a preference label underneath. Vegetarian state changes both icon and words, plus a green-tinted material treatment. The add-seat affordance uses a dashed round mark and directly says that the new seat is vegetarian. Preference popovers show the selected choice with a check SVG.
+
+Each seat is a named, fictional portrait. Only vegetarian seats show the Leaf dietary caption; **Eats everything** appears inside the preference popover rather than repeating around the rim. The selected preference includes a check SVG. The empty coral chair says **One more friend?** and explicitly adds a vegetarian seat. After seven friends, a short invitation near the heading adds more; additional portraits reuse the seven-image set by stable friend ID.
 
 ### Cards / Containers
-The signature container is the **place setting**, not a dashboard card: food art above an elliptical plate, name and plate count below, controls immediately beside it. The table and shopping list use open composition with thin boundaries. Do not derive a generic rectangular card system from this screen's oval stage.
+
+The signature container is a place setting: painted plate and food, name and selected amount, then local actions or an optional quantity strip. There is no general dashboard-card treatment to inherit. Preference and explanation popovers are the compact floating containers, while the shopping drawer groups rows with separators.
 
 ### Inputs / Fields
-The budget field sits inside a compact popover (250px wide, padding 18px). It has the frontmatter inset and radius, a hairline border, and a visible label. The reason popover is wider (305px) with readable (12px / 1.6) explanations. Shared portal primitives own borders, white surfaces and their existing focus behavior; preserve these when reusing the controls.
+
+The budget field lives in a labeled popover (250px wide, padding 18px). Its border uses Portal line, inset (8px), radius (4px) and a full-width native number input. The reason popover is (305px) wide with (12px / 1.6) explanations. Both retain shared portal borders, modest corners and ambient elevation. Portal text overrides at the end of the stylesheet take precedence over the earlier (11px–12px) preference defaults.
 
 ### Navigation
-The header is a wordmark plus a compact tool row: Sample/Live mode, Undo, Reset and Shopping list. Shopping gets a left divider; secondary controls stay plain. At mobile widths the tools occupy a full wrapped row, with mode aligned to the start. The skip link appears on keyboard focus and leads to the table.
 
-### Suggested plate
-A translucent plate is an unaccepted alternative. Its separate native button accepts that ingredient, while nearby reject and reason buttons remain independently operable. The global acceptance action places all remaining valid suggestions. The quantity change stays next to the affected food; a broth suggestion belongs to the pot. Brief Menu, Shopping and Budget callouts explain concrete work, then disappear after (6500ms); the reason popover remains available.
+A wordmark and quiet tool row contain Sample/Live mode, Undo, Reset and Shopping list. Shopping is separated with one left divider. The mobile tools use a full-width four-column grid; mode remains at the start. There is no role-tab navigation.
 
-Menu invokes a model only in Live mode. Sample is explicitly labeled and fully playable; Shopping and Budget always calculate deterministically from exact quantities. Local Live is currently unconfigured. Keep its visible error, Retry Menu and explicit switch to Sample; do not imply an available live service or silently replace a failed request. Manual edits apply immediately, support Undo, and invalidate stale offers. Must keep protects ingredient identity and at least the selected quantity from assistants.
+### Suggested quantity
+
+A suggestion states the actual selected and proposed amount (`2 → 3 plates`) beside **Use**, with independent Reject and Why SVG buttons. It is not an unexplained extra plate. A new ingredient also shows its name and a translucent copy of the same PNG (opacity 0.4); it is never a geometric stand-in. Broth changes belong beside the pot and use servings.
+
+The response derives its Menu sentence from a real changed food and friend, then states Shopping's whole-pack price impact, Budget's revision result and the separate suggested-table total. **Selected table** always names the confirmed total above. Batch acceptance applies remaining valid changes; individual acceptance and rejection remain local. Why opens actual Menu, Shopping and Budget evidence. These are state-derived explanations rather than timed decorative assistant labels.
+
+Menu calls a model only in Live mode. Sample is explicitly labeled and fully playable. Shopping and Budget always calculate deterministically from Menu's exact quantities. Local Live remains unconfigured: preserve its visible error, Retry Menu and explicit switch to Sample. Manual edits are immediate, support Undo and invalidate stale offers. Must keep protects ingredient identity and at least the selected quantity from assistants.
 
 ### Shopping purchase row
-Each expandable row has food art, a name, plate count and purchase subtotal. Expanding reveals the conversion from portions to quantities, whole packs, surplus and actual purchase arithmetic. Pending suggestions enter the drawer only through the explicit preview checkbox. Row dividers, not individual cards, organize the list.
 
-One plate means Napa (200g), enoki (150g), tofu (300g), beef (300g), lotus (150g), noodles (250g), bok choy (150g); broth uses one serving. These are serving units, not package sizes or inventory. The UI keeps portions on the table and grams/packages in the drawer; prices remain sample USD and no order is placed.
+Expandable rows show the same illustrated thumbnail, name, selected plate amount and purchase subtotal. Expansion reveals portions, ingredient quantity, whole packs, purchased surplus and actual arithmetic. Unaccepted suggestions enter this drawer only through its preview checkbox.
 
-### Food artwork and provenance
-Reuse the nine unchanged PNG cutouts imported by `src/components/food-art.tsx`: beef, bok choy, broth, enoki, lotus, Napa, noodles, pot and tofu. All are existing repository assets from checkpoint `dd37953`; no raster was generated, edited or replaced during this table implementation. Their earlier creator, generator and license history are not established by the available repository evidence. `.impeccable/design.json` records each repository path and Git blob identity for traceability. The empty-pot state retains the existing code-native SVG fallback and its inherited root color variables. Decorative cutouts have empty alternative text because their adjacent controls and labels name the food.
+One plate represents Napa (200g), enoki (150g), tofu (300g), beef (300g), lotus (150g), noodles (250g) or bok choy (150g); broth uses one serving. These are portions rather than package sizes. Preserve the existing catalog calculations and sample USD pricing; do not invent nutrition, stock or ordering.
 
-Visual verification artifacts are `../outputs/playable-table-1440x900.jpg`, `../outputs/playable-table-960x900.jpg`, `../outputs/playable-table-390.jpg`, `../outputs/playable-shopping.jpg` and `../outputs/playable-broth-preview.jpg`. These are implementation captures, not external reference images or additional food assets.
+### Illustration assets and provenance
+
+`src/components/table-illustration.tsx` exclusively supplies this route's artwork from `src/assets/illustrated/`: seven food-on-plate PNGs, a steaming pot, an empty pot, seven distinctive fictional portraits and an empty coral chair (17 assets). Broth thumbnails intentionally reuse the pot. Friend images are indexed by stable ID modulo seven, so removing a different friend does not change a surviving friend's portrait.
+
+The assets were created with the built-in `image_gen` tool on (2026-11-12), on true transparent alpha. `src/assets/illustrated/prompts.json` preserves every exact prompt and generation filename. The earlier nine repository PNGs remain legacy assets and are not imported by this route; the former SVG empty-pot fallback is not this route's empty state. Decorative images have empty alternative text and are hidden from assistive technology because adjacent labels and controls supply their names.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep controls beside the friend, plate or pot they change.
-- **Do** preserve the distinction between solid selected food and translucent unaccepted suggestions.
-- **Do** reuse Instrument Sans and the existing food cutouts.
-- **Do** pair dietary, protected and suggestion color with explicit words or SVG icons.
-- **Do** preserve visible focus, keyboard/click alternatives to dragging, and the mobile friends strip.
-- **Do** derive portions, package costs and assistant explanations from the shared calculations.
+
+- **Do** use the cohesive transparent pastel illustrations with fine grain, soft edges and natural volume.
+- **Do** preserve generous paper space and quiet Instrument Sans typography.
+- **Do** keep plate and friend controls beside the object they change.
+- **Do** distinguish selected amounts, proposed amounts and their separate prices in words.
+- **Do** keep a protected pin visible after plate controls close.
+- **Do** preserve keyboard focus, click alternatives to dragging and vertically spaced mobile positions.
+- **Do** derive assistant explanations, portions and purchase costs from shared state and calculations.
 
 ### Don't:
-- **Don't** restore the previous form, role-tab and review-card composition as the table's template.
-- **Don't** treat NONO MARKET's commerce layout as the application's layout template.
-- **Don't** present an unaccepted plate or preview cost as part of the confirmed table.
-- **Don't** describe deterministic Shopping or Budget calculations as separate model calls.
-- **Don't** imply Live is configured locally or silently switch a failed Live request to Sample.
-- **Don't** add game timers, levels, character movement, checkout or invented stock.
 
-Not canonized: the older root palette, shared primitive defaults, and compact (9px–10px) annotations remain implementation observations rather than new universal rules. This documentation pass does not repair those inherited differences or expand the finish review beyond its four resolved findings.
+- **Don't** substitute photos, CSS photo blur, crisp geometric food SVGs or generic avatar icons for this illustration set.
+- **Don't** add CSS plates beneath artwork that already includes painted porcelain.
+- **Don't** restore the old form, role tabs and review-card composition as this table's template.
+- **Don't** treat NONO MARKET's commerce layout as the application's composition.
+- **Don't** present unaccepted suggestions or their prices as confirmed table choices.
+- **Don't** describe Shopping or Budget as model calls, imply local Live is configured, or silently replace a failed Live request with Sample.
+- **Don't** add nutrition claims, stock, checkout, game timers, levels or character movement.
+
+Not canonized or repaired by this documentation pass: the inherited root palette and slightly different portal colors remain contextual implementation differences, not a second universal theme. Compact (11px) annotations are observations, not a universal minimum-size recommendation. This record does not expand the finish review beyond its two resolved findings. Native drag start was observed, but the browser driver did not emit a drop; keyboard/click equivalence and arithmetic were verified separately, so native drag completion is not claimed.

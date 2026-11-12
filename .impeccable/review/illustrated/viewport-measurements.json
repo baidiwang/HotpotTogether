@@ -1,0 +1,514 @@
+[
+  {
+    "bounds": [
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Sample modeResetShopping list",
+        "right": 1383,
+        "w": 382.890625,
+        "x": 1000.109375,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Planning mode",
+        "right": 1107.28125,
+        "w": 107.171875,
+        "x": 1000.109375,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Undo",
+        "right": 1152.28125,
+        "w": 29,
+        "x": 1123.28125,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Reset",
+        "right": 1238.296875,
+        "w": 70.015625,
+        "x": 1168.28125,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Shopping list",
+        "right": 1383,
+        "w": 128.703125,
+        "x": 1254.296875,
+        "y": 14.5
+      },
+      {
+        "bottom": 167.015625,
+        "h": 72.046875,
+        "label": "Change budget",
+        "right": 1302.5,
+        "w": 149.9375,
+        "x": 1152.5625,
+        "y": 94.96875
+      },
+      {
+        "bottom": 731.640625,
+        "h": 108.1875,
+        "label": "Edit Taylor's preference",
+        "right": 1098.5,
+        "w": 100,
+        "x": 998.5,
+        "y": 623.453125
+      },
+      {
+        "bottom": 731.640625,
+        "h": 108.1875,
+        "label": "Edit Riley's preference",
+        "right": 426.5,
+        "w": 100,
+        "x": 326.5,
+        "y": 623.453125
+      },
+      {
+        "bottom": 707.546875,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 991.5,
+        "w": 174,
+        "x": 817.5,
+        "y": 675.546875
+      },
+      {
+        "bottom": 707.546875,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 607.5,
+        "w": 174,
+        "x": 433.5,
+        "y": 675.546875
+      },
+      {
+        "bottom": 834.390625,
+        "h": 40,
+        "label": "Use these changes No thanks",
+        "right": 1232.5,
+        "w": 237.515625,
+        "x": 994.984375,
+        "y": 794.390625
+      },
+      {
+        "bottom": 834.390625,
+        "h": 40,
+        "label": "Use these changes",
+        "right": 1157.46875,
+        "w": 162.484375,
+        "x": 994.984375,
+        "y": 794.390625
+      },
+      {
+        "bottom": 834.390625,
+        "h": 40,
+        "label": "No thanks",
+        "right": 1232.5,
+        "w": 60.03125,
+        "x": 1172.46875,
+        "y": 794.390625
+      }
+    ],
+    "clientWidth": 1425,
+    "documentWidth": 1425,
+    "dpr": 1,
+    "height": 900,
+    "scale": 1,
+    "scrollY": 0,
+    "width": 1440
+  },
+  {
+    "bounds": [
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Sample modeResetShopping list",
+        "right": 917,
+        "w": 382.890625,
+        "x": 534.109375,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Planning mode",
+        "right": 641.28125,
+        "w": 107.171875,
+        "x": 534.109375,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Undo",
+        "right": 686.28125,
+        "w": 29,
+        "x": 657.28125,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Reset",
+        "right": 772.296875,
+        "w": 70.015625,
+        "x": 702.28125,
+        "y": 14.5
+      },
+      {
+        "bottom": 54.5,
+        "h": 40,
+        "label": "Shopping list",
+        "right": 917,
+        "w": 128.703125,
+        "x": 788.296875,
+        "y": 14.5
+      },
+      {
+        "bottom": 167.015625,
+        "h": 72.046875,
+        "label": "Change budget",
+        "right": 917,
+        "w": 149.9375,
+        "x": 767.0625,
+        "y": 94.96875
+      },
+      {
+        "bottom": 719.640625,
+        "h": 96.1875,
+        "label": "Edit Taylor's preference",
+        "right": 842.53125,
+        "w": 100,
+        "x": 742.53125,
+        "y": 623.453125
+      },
+      {
+        "bottom": 719.640625,
+        "h": 96.1875,
+        "label": "Edit Riley's preference",
+        "right": 202.453125,
+        "w": 100,
+        "x": 102.453125,
+        "y": 623.453125
+      },
+      {
+        "bottom": 705.546875,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 711.515625,
+        "w": 158,
+        "x": 553.515625,
+        "y": 673.546875
+      },
+      {
+        "bottom": 705.546875,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 391.46875,
+        "w": 158,
+        "x": 233.46875,
+        "y": 673.546875
+      },
+      {
+        "bottom": 834.390625,
+        "h": 40,
+        "label": "Use these changes No thanks",
+        "right": 917,
+        "w": 237.515625,
+        "x": 679.484375,
+        "y": 794.390625
+      },
+      {
+        "bottom": 834.390625,
+        "h": 40,
+        "label": "Use these changes",
+        "right": 841.96875,
+        "w": 162.484375,
+        "x": 679.484375,
+        "y": 794.390625
+      },
+      {
+        "bottom": 834.390625,
+        "h": 40,
+        "label": "No thanks",
+        "right": 917,
+        "w": 60.03125,
+        "x": 856.96875,
+        "y": 794.390625
+      }
+    ],
+    "clientWidth": 945,
+    "documentWidth": 945,
+    "dpr": 1,
+    "height": 1000,
+    "scale": 1,
+    "scrollY": 0,
+    "width": 960
+  },
+  {
+    "bounds": [
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Sample modeResetShopping list",
+        "right": 627,
+        "w": 609,
+        "x": 18,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Planning mode",
+        "right": 402,
+        "w": 384,
+        "x": 18,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Undo",
+        "right": 437,
+        "w": 30,
+        "x": 407,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Reset",
+        "right": 504,
+        "w": 62,
+        "x": 442,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Shopping list",
+        "right": 627,
+        "w": 118,
+        "x": 509,
+        "y": 47.5
+      },
+      {
+        "bottom": 182.375,
+        "h": 69.75,
+        "label": "Change budget",
+        "right": 627,
+        "w": 158,
+        "x": 469,
+        "y": 112.625
+      },
+      {
+        "bottom": 1151.6875,
+        "h": 96.1875,
+        "label": "Edit Taylor's preference",
+        "right": 541.109375,
+        "w": 84,
+        "x": 457.109375,
+        "y": 1055.5
+      },
+      {
+        "bottom": 1151.6875,
+        "h": 96.1875,
+        "label": "Edit Riley's preference",
+        "right": 187.875,
+        "w": 84,
+        "x": 103.875,
+        "y": 1055.5
+      },
+      {
+        "bottom": 1019.6875,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 552.65625,
+        "w": 168,
+        "x": 384.65625,
+        "y": 987.6875
+      },
+      {
+        "bottom": 1019.6875,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 260.328125,
+        "w": 168,
+        "x": 92.328125,
+        "y": 987.6875
+      },
+      {
+        "bottom": 1359.296875,
+        "h": 40,
+        "label": "Use these changes No thanks",
+        "right": 627,
+        "w": 609,
+        "x": 18,
+        "y": 1319.296875
+      },
+      {
+        "bottom": 1359.296875,
+        "h": 40,
+        "label": "Use these changes",
+        "right": 550.96875,
+        "w": 162.484375,
+        "x": 388.484375,
+        "y": 1319.296875
+      },
+      {
+        "bottom": 1359.296875,
+        "h": 40,
+        "label": "No thanks",
+        "right": 627,
+        "w": 60.03125,
+        "x": 566.96875,
+        "y": 1319.296875
+      }
+    ],
+    "clientWidth": 645,
+    "documentWidth": 645,
+    "dpr": 1,
+    "height": 1090,
+    "scale": 1,
+    "scrollY": 0,
+    "width": 660
+  },
+  {
+    "bounds": [
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Sample modeResetShopping list",
+        "right": 361,
+        "w": 347,
+        "x": 14,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Planning mode",
+        "right": 149,
+        "w": 135,
+        "x": 14,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Undo",
+        "right": 181,
+        "w": 28,
+        "x": 153,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Reset",
+        "right": 243,
+        "w": 58,
+        "x": 185,
+        "y": 47.5
+      },
+      {
+        "bottom": 83.5,
+        "h": 36,
+        "label": "Shopping list",
+        "right": 361,
+        "w": 114,
+        "x": 247,
+        "y": 47.5
+      },
+      {
+        "bottom": 191.3125,
+        "h": 69.75,
+        "label": "Change budget",
+        "right": 361,
+        "w": 158,
+        "x": 203,
+        "y": 121.5625
+      },
+      {
+        "bottom": 1308.1875,
+        "h": 84.796875,
+        "label": "Edit Taylor's preference",
+        "right": 341.46875,
+        "w": 72,
+        "x": 269.46875,
+        "y": 1223.390625
+      },
+      {
+        "bottom": 1308.1875,
+        "h": 84.796875,
+        "label": "Edit Riley's preference",
+        "right": 105.515625,
+        "w": 72,
+        "x": 33.515625,
+        "y": 1223.390625
+      },
+      {
+        "bottom": 1136.578125,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 350.765625,
+        "w": 160,
+        "x": 190.765625,
+        "y": 1104.578125
+      },
+      {
+        "bottom": 1136.578125,
+        "h": 32,
+        "label": "2 → 3 plates Use",
+        "right": 184.21875,
+        "w": 160,
+        "x": 24.21875,
+        "y": 1104.578125
+      },
+      {
+        "bottom": 1535.484375,
+        "h": 40,
+        "label": "Use these changes No thanks",
+        "right": 361,
+        "w": 347,
+        "x": 14,
+        "y": 1495.484375
+      },
+      {
+        "bottom": 1535.484375,
+        "h": 40,
+        "label": "Use these changes",
+        "right": 284.96875,
+        "w": 162.484375,
+        "x": 122.484375,
+        "y": 1495.484375
+      },
+      {
+        "bottom": 1535.484375,
+        "h": 40,
+        "label": "No thanks",
+        "right": 361,
+        "w": 60.03125,
+        "x": 300.96875,
+        "y": 1495.484375
+      }
+    ],
+    "clientWidth": 375,
+    "documentWidth": 375,
+    "dpr": 1,
+    "height": 844,
+    "scale": 1,
+    "scrollY": 0,
+    "width": 390
+  }
+]
