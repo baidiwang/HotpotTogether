@@ -42,7 +42,7 @@ export const shoppingAssistant = (plan: Plan): Purchase[] => catalog.filter(item
 export function coordinate(plan: Plan, confirmed: Plan): Pipeline {
   const menu: Pipeline['menu'] = { id: 'menu', plan, affected: catalog.filter(item => plan.quantities[item.id] !== confirmed.quantities[item.id]).map(item => item.id) };
   const purchases = shoppingAssistant(menu.plan);
-  const shopping: Pipeline['shopping'] = { id: 'shopping', source: menu.id, purchases, affected: purchases.filter(row => row.packs !== packages(confirmed.quantities[row.item.id], row.item)).map(row => row.item.id), extraPacks: purchases.reduce((sum, row) => sum + row.packs - packages(confirmed.quantities[row.item.id], row.item), 0) };
+  const shopping: Pipeline['shopping'] = { id: 'shopping', source: menu.id, purchases, affected: catalog.filter(item => packages(plan.quantities[item.id],item) !== packages(confirmed.quantities[item.id],item)).map(item=>item.id), extraPacks: purchases.reduce((sum,row)=>sum+row.packs,0)-shoppingAssistant(confirmed).reduce((sum,row)=>sum+row.packs,0) };
   const total = shopping.purchases.reduce((sum, row) => sum + row.subtotal, 0);
   const budget: Pipeline['budget'] = { id: 'budget', source: shopping.id, total, overBy: Math.max(0, total - plan.budget), drivers: [...shopping.purchases].sort((a,b) => b.subtotal - a.subtotal).slice(0,2).map(row => row.item.id) };
   return { menu, shopping, budget };
